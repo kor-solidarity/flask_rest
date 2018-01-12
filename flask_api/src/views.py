@@ -365,7 +365,8 @@ def item_info(item_num):
                            , item_effect_columns=item_effect_columns
                            , item_info=item_info
                            , item_reg=1, item_pic_location=item_pic_location
-                           , item_effect_columns_len=item_effect_columns_len)
+                           , item_effect_columns_len=item_effect_columns_len
+                           , season_item=0)
 
 
 @app.route('/a/')
@@ -547,23 +548,28 @@ def register():
 @app.route('/inp', methods=['POST', 'GET'])
 def inp():
     # 포스트 방식으로 name 태그 붙은 인풋들 다 잘 받아지긴 함.
-    # FILE은????
-    res = request.forml
+    res = request.form
     for r in res:
         print(res[r])
         # print(r.value)
     print(res)
     # 이게 파일임. bool 적용이 되니 그걸로 판단한다.
-    img = request.files['image']
-    # 이거 기능: 파일명을 더 안정적인 버전으로 변환.
-    name = secure_filename(img.filename)
-    print('name: {}'.format(name))
-    print(img)
-    print(bool(img))
-    img.save(os.path.join(app.config['UPLOAD_FOLDER']+'/pic/items', name))
+    try:
+        img = request.files['image']
+    # 여기 걸린다는건 업로드한 사진이 없다는거임.
+    except Exception as e:
+        img = False
+    # print(bool(img))
+    if img:
+        # 이거 기능: 파일명을 더 안정적인 버전으로 변환.
+        name = secure_filename(img.filename)
+        print('name: {}'.format(name))
+        print(img)
+        img.save(os.path.join(app.config['UPLOAD_FOLDER']+'/pic/items', name))
     return 'um??'
 
 
+# 아이템 수정
 @app.route('/item_edit/<item_num>')
 def item_edit(item_num):
-    pass
+    return

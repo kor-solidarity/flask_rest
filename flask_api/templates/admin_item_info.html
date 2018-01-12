@@ -162,6 +162,11 @@
     </table>
 <input type="button" value="초기화" onclick="reset_data()">
 <input type="submit">
+{% if season_item == 1 %}
+    <input name="season_item" type="hidden" id="season_item" value="1" />
+{% else %}
+    <input name="season_item" type="hidden" id="season_item" value="0" />
+{% endif %}
 <input type="button" value="목록으로" >
 </form>
 {% endblock %}
