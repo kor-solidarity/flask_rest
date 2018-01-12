@@ -1,0 +1,197 @@
+{% extends "admin.html" %}
+
+{# 이 페이지 기능:
+    1. 아이템을 조회하고 그걸 수정한다.
+    2. 아이템을 새로 등록한다.
+#}
+
+{% block topic %}
+{#    item_reg 이 1일 경우 등록이 된 아이템을 수정하는거. #}
+{#    0일 경우 새 아이템을 등록하는거 #}
+    {% if item_reg == 1 %}
+        아이템 [{{ item[1] }} (번호: {{ item[0] }} )] 조회·수정
+    {% else %}
+        아이템 등록
+    {% endif %}
+{% endblock %}
+{#
+☑ ⬜
+필요한 사항.
+· 이곳은 두 기능을 겸직한다.
+    1. 아이템 등록.
+    2. 아이템 조회/수정(따로 구분되지 않는다).
+· 우선 등록창만 만들고 그 다음에 본격적으로 뭘 합시다.
+안에 드가야 하는거:
+    ⬜ 템이름
+    ⬜ 템번호(수정불가)
+    ⬜ 사진
+    ⬜ 랭크
+    ⬜ 유료여부(체크박스?)
+    ⬜ 템 현황.
+#}
+{% block content %}
+{% if item_reg == 0 %}
+    등록할 아이템 이름:
+    <input type="text" name="item_name">
+    {#    {% else %}#}
+    {#    아이템 이름:#}
+    {#    <input type="text" name="item_name" value="{{ item_name }}">#}
+{% endif %}
+&nbsp;&nbsp;&nbsp;&nbsp;
+{#여기서 사진 프리뷰가 나와야함 #}
+<form id="form" action="/inp" method="post" enctype="multipart/form-data">
+<img name="ori_image" height="200" width="200" id="ori_image" src="{{ url_for('static', filename=item_pic_location) }}">
+<img name="image" height="200" width="200" id="image" src="{{ url_for('static', filename=item_pic_location) }}" hidden>
+<input name="image" type="file" id="file_input"/>
+    <br>
+    <br>
+    <table border="1">
+    <tbody>
+        <tr>
+        <th> 유료템인가?(맞으면 체크) </th>
+{#            해당 템이 크루템인지 일반템인지 확인. #}
+{#            만일 템을 등록하는 중이면 어떤 템으로 할지 확인하는거. #}
+            {% if item_reg == 1 %}
+            <th>비고</th>
+            {% else %}
+            <th>시즌템 여부</th>
+            {% endif %}
+        </tr>
+        <tr>
+            <td align="right">
+                {% if item[-2] %}
+        <input name="iap" type="checkbox" id="iap" checked="checked"/>
+                {% else %}
+{# 체크박스는 체크가 된 상태에만 자료가 넘어간다. 이 경우 ('iap', 'on') 으로 반환됨 #}
+        <input name="iap" type="checkbox" id="iap" />
+                {% endif %}
+            </td>
+{#        item_reg = 1 == 아이템 수정한단 소리.#}
+        {% if item_reg == 1 %}
+        <td>
+            {% if season_item == 1 %}
+            시즌템.
+            {% else %}
+            일반템.
+            {% endif %}
+            <br><span style="color: red">※ 템의 종류는 한번 설정하면 수정불가!
+            <br>&emsp; 테이블 자체가 틀림.</span>
+        </td>
+{#        엘스 == 아이템을 새로 등록하는거.#}
+        {% else %}
+        <td>
+            <fieldset>
+                <input type="radio" name="is_season_item" value="1"> 시즌템 <br>
+                <input type="radio" name="is_season_item" value="0"> 일반템
+            </fieldset>
+        </td>
+        {% endif %}
+        </tr>
+    </tbody>
+
+    </table>
+    <br>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>항목</th>
+                <th>수정·기입</th>
+                <th>설명</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+{#               첫칸: 템이름. #}
+                <th>{{ item_info_columns[1][0] }}</th>
+                {% if item_reg %}
+                <td><input name="item_name" id="item_name" value="{{ item[1] }}"/></td>
+                {% else %}
+                <td><input name="item_name" id="item_name" /></td>
+                {% endif %}
+                <td>{{ item_info_columns[1][-1] }}</td>
+            </tr>
+{#            둘째칸: 템 설명#}
+            <tr>
+                <th>{{ item_info_columns[2][0] }}</th>
+                    <td>
+                        {% if item_reg %}
+                            <textarea name="item_descr" rows="2" cols="60" id="item_descr">{{ item[2] }}</textarea>
+                        {% else %}
+                            <textarea name="item_descr" rows="2" cols="60" id="item_descr"></textarea>
+                        {% endif %}
+                    </td>
+                <td>{{ item_info_columns[2][-1] }}</td>
+            </tr>
+{#            셋째칸: 템 랭크#}
+            <tr>
+                <th>{{ item_info_columns[-1][0] }}</th>
+                {% if item_reg %}
+                <td><input name="item_descr" id="item_descr" value="{{ item[-1] }}"/></td>
+                {% else %}
+                <td><input name="item_descr" id="item_descr" /></td>
+                {% endif %}
+                <td>{{ item_info_columns[-1][-1] }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>항목</th>
+                <th>수치</th>
+                <th>설명</th>
+            </tr>
+        </thead>
+    <tbody>
+{#    각 템들 효과사항들. #}
+        {% for i in range(item_effect_columns_len) %}
+            {% if i != 0 %}
+        <tr>
+            <th>{{ item_effect_columns[i][0] }}</th>
+            {% if item_reg %}
+            <td><input name="item_effect_{{ i }}" id="item_effect_{{ i }}" type="number" value="{{ item_info[i] }}"></td>
+            {% else %}
+            <td><input name="item_effect_{{ i }}" id="item_effect_{{ i }}" type="number" value=""></td>
+            {% endif %}
+            <td>{{ item_effect_columns[i][-1] }}</td>
+        </tr>
+            {% endif %}
+        {% endfor %}
+    </tbody>
+    </table>
+<input type="button" value="초기화" onclick="reset_data()">
+<input type="submit">
+<input type="button" value="목록으로" >
+</form>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript" src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
+<script>
+    function readURL(input) {
+        if (input.files || input.files[0]){
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                $("#image").removeAttr('hidden');
+                $("#image").attr('src', e.target.result);
+                $("#ori_image").attr('hidden', 'hidden')
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    $(function () {
+        $("#file_input").on("change", function () {
+            readURL(this);
+        });
+    });
+
+    function reset_data() {
+        $("#form").each(function () {
+            this.reset()
+        });
+        $("#image").attr('hidden', 'hidden');
+        $("#ori_image").removeAttr('hidden');
+    }
+</script>
+{% endblock %}

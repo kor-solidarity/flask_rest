@@ -1,0 +1,47 @@
+{% extends 'admin.html' %}
+{% block topic %}아이템 목록 - {{ type }} {% endblock %}
+
+{#
+해야하는 사항
+· 위 아이템 목록쪽에 어떤 식으로 정렬을 했는지 확인한다.
+☑ ⬜
+· 아래에 들어가야 하는 자료:
+⬜ 페이징
+    ⬜ 목록은 무조건 오십개단위. 더 적게? 닥쳐 몰라 안해줄거야.
+⬜ 검색
+    ⬜ 아래 항목들까지 포함.
+⬜ 모든거에 A태그 달면되나?
+⬜ 관리번호
+⬜ 사진
+⬜ 이름
+⬜ 랭크
+⬜ 유료템 여부
+#}
+{% block content %}
+
+    {% if error %}
+        <p style="color:red;">
+        {{ error }}
+
+    {% else %}
+        <table border="1">
+            <tbody>
+                <tr>
+                    <th>#</th>
+                    <th>사진</th>
+                    <th>이름</th>
+                    <th>RANK</th>
+                    <th>유료템?</th>
+                </tr>
+                {% for l in item_list %}
+                <tr>
+                    <td>{{ l }}</td>
+                    <td>{{ l }}</td>
+                    <td>{{ l }}</td>
+                    <td>{{ l }}</td>
+                    <td>{{ l }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
