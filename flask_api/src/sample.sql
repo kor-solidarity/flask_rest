@@ -18,6 +18,7 @@ CREATE DATABASE IF NOT EXISTS `lifgames_railroad` /*!40100 DEFAULT CHARACTER SET
 USE `lifgames_railroad`;
 
 -- 테이블 lifgames_railroad.crew 구조 내보내기
+DROP TABLE IF EXISTS `crew`;
 CREATE TABLE IF NOT EXISTS `crew` (
   `crew_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '기초적인 관리번호',
   `crew_name` int(11) NOT NULL COMMENT '크루 이름(번호)...',
@@ -37,6 +38,7 @@ INSERT INTO `crew` (`crew_id`, `crew_name`, `crew_desc`, `crew_boundary`, `crew_
 /*!40000 ALTER TABLE `crew` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad.deal_rec 구조 내보내기
+DROP TABLE IF EXISTS `deal_rec`;
 CREATE TABLE IF NOT EXISTS `deal_rec` (
   `deal_num` int(11) NOT NULL AUTO_INCREMENT COMMENT '거래순번',
   `deal_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '거래시각',
@@ -56,10 +58,11 @@ DELETE FROM `deal_rec`;
 /*!40000 ALTER TABLE `deal_rec` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad.items 구조 내보내기
+DROP TABLE IF EXISTS `items`;
 CREATE TABLE IF NOT EXISTS `items` (
   `id_num` int(11) NOT NULL AUTO_INCREMENT COMMENT 'numbro de item-o. Ĉu mi devas klarigi ĉi tio?',
-  `item_nomo` varchar(50) COLLATE utf8_bin NOT NULL COMMENT 'nomo de aĵo',
-  `item_klarigo` varchar(500) COLLATE utf8_bin NOT NULL COMMENT 'klarigo de aĵo',
+  `item_nomo` varchar(50) COLLATE utf8_bin NOT NULL COMMENT '이름',
+  `item_klarigo` varchar(500) COLLATE utf8_bin NOT NULL COMMENT '설명',
   `item_image` varchar(50) COLLATE utf8_bin NOT NULL COMMENT 'image name',
   `item_iap` int(11) NOT NULL DEFAULT '0' COMMENT '유료템인가? 0이면 아님',
   `item_rank` int(11) NOT NULL DEFAULT '0' COMMENT '랭크제한.',
@@ -75,6 +78,7 @@ INSERT INTO `items` (`id_num`, `item_nomo`, `item_klarigo`, `item_image`, `item_
 /*!40000 ALTER TABLE `items` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad.items_effect 구조 내보내기
+DROP TABLE IF EXISTS `items_effect`;
 CREATE TABLE IF NOT EXISTS `items_effect` (
   `id_num` int(11) NOT NULL COMMENT '아이템명. items 테이블 번호와 호환되야함. ',
   `itm_atk` int(11) NOT NULL COMMENT '공격력 효과',
@@ -104,6 +108,7 @@ INSERT INTO `items_effect` (`id_num`, `itm_atk`, `itm_timer`, `itm_max_pause`, `
 /*!40000 ALTER TABLE `items_effect` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad.items_iap 구조 내보내기
+DROP TABLE IF EXISTS `items_iap`;
 CREATE TABLE IF NOT EXISTS `items_iap` (
   `id_num` int(11) NOT NULL AUTO_INCREMENT COMMENT '템번호',
   `item_nomo` int(11) NOT NULL COMMENT '이름',
@@ -120,6 +125,7 @@ INSERT INTO `items_iap` (`id_num`, `item_nomo`, `item_klarigo`, `item_image`) VA
 /*!40000 ALTER TABLE `items_iap` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad.items_iap_effect 구조 내보내기
+DROP TABLE IF EXISTS `items_iap_effect`;
 CREATE TABLE IF NOT EXISTS `items_iap_effect` (
   `id_num` int(11) NOT NULL COMMENT '기본 관리번호. items_iap의 번호와 맞아야한다. ',
   `iap_atk` int(11) NOT NULL COMMENT '공격력 효과',
@@ -147,6 +153,7 @@ DELETE FROM `items_iap_effect`;
 /*!40000 ALTER TABLE `items_iap_effect` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad.season 구조 내보내기
+DROP TABLE IF EXISTS `season`;
 CREATE TABLE IF NOT EXISTS `season` (
   `season_num` int(11) NOT NULL AUTO_INCREMENT COMMENT '관리번호',
   `season_descr` varchar(500) COLLATE utf8_bin NOT NULL COMMENT '시즌 이야기',
@@ -163,6 +170,7 @@ DELETE FROM `season`;
 /*!40000 ALTER TABLE `season` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad.season_item 구조 내보내기
+DROP TABLE IF EXISTS `season_item`;
 CREATE TABLE IF NOT EXISTS `season_item` (
   `season_item_num` int(11) NOT NULL AUTO_INCREMENT,
   `season_item_name` int(11) NOT NULL COMMENT '이름',
@@ -178,6 +186,7 @@ DELETE FROM `season_item`;
 /*!40000 ALTER TABLE `season_item` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad.season_item_effect 구조 내보내기
+DROP TABLE IF EXISTS `season_item_effect`;
 CREATE TABLE IF NOT EXISTS `season_item_effect` (
   `season_item_num` int(11) NOT NULL,
   `itm_atk` int(11) NOT NULL COMMENT '공격력 효과',
@@ -205,6 +214,7 @@ DELETE FROM `season_item_effect`;
 /*!40000 ALTER TABLE `season_item_effect` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad._best_record 구조 내보내기
+DROP TABLE IF EXISTS `_best_record`;
 CREATE TABLE IF NOT EXISTS `_best_record` (
   `player_num` int(11) NOT NULL COMMENT '플레이어 이름. ',
   `record_num` int(11) NOT NULL COMMENT '기록정보. 어차피 기록중에 가장 점수 잘나온거만 빼오는거니 여기에 굳이 별도의 자료가 필요하진 않음.',
@@ -218,6 +228,7 @@ DELETE FROM `_best_record`;
 /*!40000 ALTER TABLE `_best_record` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad._blocked_player 구조 내보내기
+DROP TABLE IF EXISTS `_blocked_player`;
 CREATE TABLE IF NOT EXISTS `_blocked_player` (
   `user_num` int(11) NOT NULL COMMENT '차단시도하는 당사자',
   `blocked_num` int(11) NOT NULL COMMENT '차단대상',
@@ -231,6 +242,7 @@ DELETE FROM `_blocked_player`;
 /*!40000 ALTER TABLE `_blocked_player` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad._friends 구조 내보내기
+DROP TABLE IF EXISTS `_friends`;
 CREATE TABLE IF NOT EXISTS `_friends` (
   `player_unique_id` int(11) NOT NULL COMMENT '친구추가 당사자',
   `friend_unique_id` int(11) NOT NULL COMMENT '추가할 친구',
@@ -247,6 +259,7 @@ DELETE FROM `_friends`;
 /*!40000 ALTER TABLE `_friends` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad._friends_copy 구조 내보내기
+DROP TABLE IF EXISTS `_friends_copy`;
 CREATE TABLE IF NOT EXISTS `_friends_copy` (
   `player_unique_id` int(11) NOT NULL COMMENT '친구추가 당사자',
   `friend_unique_id` int(11) NOT NULL COMMENT '추가할 친구',
@@ -264,6 +277,7 @@ INSERT INTO `_friends_copy` (`player_unique_id`, `friend_unique_id`, `friend_acc
 /*!40000 ALTER TABLE `_friends_copy` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad._pass 구조 내보내기
+DROP TABLE IF EXISTS `_pass`;
 CREATE TABLE IF NOT EXISTS `_pass` (
   `user_num` int(11) NOT NULL,
   `pwd` varchar(100) COLLATE utf8_bin NOT NULL,
@@ -279,6 +293,7 @@ INSERT INTO `_pass` (`user_num`, `pwd`) VALUES
 /*!40000 ALTER TABLE `_pass` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad._players 구조 내보내기
+DROP TABLE IF EXISTS `_players`;
 CREATE TABLE IF NOT EXISTS `_players` (
   `player_num` int(11) NOT NULL AUTO_INCREMENT COMMENT '플레이어 관리용 고유번호. ',
   `player_unique_id` int(11) NOT NULL COMMENT '플레이어 식별번호? 개인적으로 왜필요한진 잘 모르겠음.',
@@ -304,6 +319,7 @@ INSERT INTO `_players` (`player_num`, `player_unique_id`, `user_num`, `affiliate
 /*!40000 ALTER TABLE `_players` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad._players_cash 구조 내보내기
+DROP TABLE IF EXISTS `_players_cash`;
 CREATE TABLE IF NOT EXISTS `_players_cash` (
   `player_unique_id` int(11) NOT NULL,
   `player_cash_1` int(11) NOT NULL DEFAULT '0' COMMENT '재화. 임의로 이름둚. 아직 확정되지 않음. ',
@@ -322,6 +338,7 @@ INSERT INTO `_players_cash` (`player_unique_id`, `player_cash_1`, `player_cash_2
 /*!40000 ALTER TABLE `_players_cash` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad._player_challenge_list 구조 내보내기
+DROP TABLE IF EXISTS `_player_challenge_list`;
 CREATE TABLE IF NOT EXISTS `_player_challenge_list` (
   `player_num` int(11) NOT NULL COMMENT '플레이어 번호. players 테이블의 프라이머리키',
   `열 2` int(11) NOT NULL DEFAULT '0' COMMENT '각 목록 달성여부: 1이 달성',
@@ -335,6 +352,7 @@ DELETE FROM `_player_challenge_list`;
 /*!40000 ALTER TABLE `_player_challenge_list` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad._player_items 구조 내보내기
+DROP TABLE IF EXISTS `_player_items`;
 CREATE TABLE IF NOT EXISTS `_player_items` (
   `player_num` int(11) NOT NULL,
   `item_num` int(11) NOT NULL,
@@ -352,6 +370,7 @@ INSERT INTO `_player_items` (`player_num`, `item_num`, `item_quantity`) VALUES
 /*!40000 ALTER TABLE `_player_items` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad._player_items_iap_locked 구조 내보내기
+DROP TABLE IF EXISTS `_player_items_iap_locked`;
 CREATE TABLE IF NOT EXISTS `_player_items_iap_locked` (
   `player_num` int(11) NOT NULL,
   `item_num` int(11) NOT NULL,
@@ -366,6 +385,7 @@ DELETE FROM `_player_items_iap_locked`;
 /*!40000 ALTER TABLE `_player_items_iap_locked` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad._player_items_locked 구조 내보내기
+DROP TABLE IF EXISTS `_player_items_locked`;
 CREATE TABLE IF NOT EXISTS `_player_items_locked` (
   `player_num` int(11) NOT NULL COMMENT '플레이어 번호',
   `unlocked_item_num` int(11) NOT NULL COMMENT '해금된 아이템 번호. 이 목록에 없으면 해금 안된거.',
@@ -381,6 +401,7 @@ DELETE FROM `_player_items_locked`;
 /*!40000 ALTER TABLE `_player_items_locked` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad._records 구조 내보내기
+DROP TABLE IF EXISTS `_records`;
 CREATE TABLE IF NOT EXISTS `_records` (
   `record_num` int(11) NOT NULL AUTO_INCREMENT,
   `player_num` int(11) NOT NULL,
@@ -400,6 +421,7 @@ DELETE FROM `_records`;
 /*!40000 ALTER TABLE `_records` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad._users 구조 내보내기
+DROP TABLE IF EXISTS `_users`;
 CREATE TABLE IF NOT EXISTS `_users` (
   `user_num` int(11) NOT NULL AUTO_INCREMENT COMMENT '고유 관리번호',
   `user_id` varchar(50) COLLATE utf8_bin NOT NULL COMMENT '아이디',

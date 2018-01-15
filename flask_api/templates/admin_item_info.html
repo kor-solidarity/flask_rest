@@ -6,9 +6,9 @@
 #}
 
 {% block topic %}
-{#    item_reg 이 1일 경우 등록이 된 아이템을 수정하는거. #}
+{#    item_edit 이 1일 경우 등록이 된 아이템을 수정하는거. #}
 {#    0일 경우 새 아이템을 등록하는거 #}
-    {% if item_reg == 1 %}
+    {% if item_edit == 1 %}
         아이템 [{{ item[1] }} (번호: {{ item[0] }} )] 조회·수정
     {% else %}
         아이템 등록
@@ -30,7 +30,7 @@
     ⬜ 템 현황.
 #}
 {% block content %}
-{% if item_reg == 0 %}
+{% if item_edit == 0 %}
     등록할 아이템 이름:
     <input type="text" name="item_name">
     {#    {% else %}#}
@@ -51,23 +51,33 @@
         <th> 유료템인가?(맞으면 체크) </th>
 {#            해당 템이 크루템인지 일반템인지 확인. #}
 {#            만일 템을 등록하는 중이면 어떤 템으로 할지 확인하는거. #}
-            {% if item_reg == 1 %}
+            {% if item_edit == 1 %}
             <th>비고</th>
             {% else %}
             <th>시즌템 여부</th>
             {% endif %}
         </tr>
         <tr>
-            <td align="right">
+            {% if item_edit == 1 %}
                 {% if item[-2] %}
+                    {% set check = 1 %}
+                {% else %}
+                    {% set check = 0 %}
+                {% endif %}
+            {% else %}
+                {% set check = 0 %}
+            {% endif %}
+{#        아이템 에딧이 0일 경우 item 변수가 애초에 존재하지 않음. #}
+            <td align="right">
+                {% if check %}
         <input name="iap" type="checkbox" id="iap" checked="checked"/>
                 {% else %}
 {# 체크박스는 체크가 된 상태에만 자료가 넘어간다. 이 경우 ('iap', 'on') 으로 반환됨 #}
         <input name="iap" type="checkbox" id="iap" />
                 {% endif %}
             </td>
-{#        item_reg = 1 == 아이템 수정한단 소리.#}
-        {% if item_reg == 1 %}
+{#        item_edit = 1 == 아이템 수정한단 소리.#}
+        {% if item_edit == 1 %}
         <td>
             {% if season_item == 1 %}
             시즌템.
@@ -84,6 +94,8 @@
                 <input type="radio" name="is_season_item" value="1"> 시즌템 <br>
                 <input type="radio" name="is_season_item" value="0"> 일반템
             </fieldset>
+            <br><span style="color: red">※ 템의 종류는 한번 설정하면 수정불가!
+            <br>&emsp; 테이블 자체가 틀림.</span>
         </td>
         {% endif %}
         </tr>
@@ -103,7 +115,7 @@
             <tr>
 {#               첫칸: 템이름. #}
                 <th>{{ item_info_columns[1][0] }}</th>
-                {% if item_reg %}
+                {% if item_edit %}
                 <td><input name="item_name" id="item_name" value="{{ item[1] }}"/></td>
                 {% else %}
                 <td><input name="item_name" id="item_name" /></td>
@@ -114,7 +126,7 @@
             <tr>
                 <th>{{ item_info_columns[2][0] }}</th>
                     <td>
-                        {% if item_reg %}
+                        {% if item_edit %}
                             <textarea name="item_descr" rows="2" cols="60" id="item_descr">{{ item[2] }}</textarea>
                         {% else %}
                             <textarea name="item_descr" rows="2" cols="60" id="item_descr"></textarea>
@@ -125,7 +137,7 @@
 {#            셋째칸: 템 랭크#}
             <tr>
                 <th>{{ item_info_columns[-1][0] }}</th>
-                {% if item_reg %}
+                {% if item_edit %}
                 <td><input name="item_descr" id="item_descr" value="{{ item[-1] }}"/></td>
                 {% else %}
                 <td><input name="item_descr" id="item_descr" /></td>
@@ -145,11 +157,12 @@
         </thead>
     <tbody>
 {#    각 템들 효과사항들. #}
+
         {% for i in range(item_effect_columns_len) %}
             {% if i != 0 %}
         <tr>
             <th>{{ item_effect_columns[i][0] }}</th>
-            {% if item_reg %}
+            {% if item_edit %}
             <td><input name="item_effect_{{ i }}" id="item_effect_{{ i }}" type="number" value="{{ item_info[i] }}"></td>
             {% else %}
             <td><input name="item_effect_{{ i }}" id="item_effect_{{ i }}" type="number" value=""></td>

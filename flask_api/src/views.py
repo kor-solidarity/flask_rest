@@ -335,7 +335,7 @@ def item_info(item_num):
     conn = mysql.connect()
     cursor = conn.cursor()
     cursor.execute('show FULL COLUMNS from items_effect')
-    # 아이템 항목(칼럼)명들.
+    # 아이템 능력치 항목(칼럼)명들.
     item_effect_columns = cursor.fetchall()
     print("effect: {}".format(item_effect_columns))
     print('\n {}'.format(item_effect_columns[0]))
@@ -345,7 +345,7 @@ def item_info(item_num):
     print("item: {}".format(item))
 
     cursor.execute("show FULL COLUMNS from items")
-
+    # 아이템 정보 관련
     item_info_columns = cursor.fetchall()
     print('item_info_columns: {}'.format(item_info_columns))
 
@@ -364,7 +364,7 @@ def item_info(item_num):
     return render_template("admin_item_info.html", item=item, item_info_columns=item_info_columns
                            , item_effect_columns=item_effect_columns
                            , item_info=item_info
-                           , item_reg=1, item_pic_location=item_pic_location
+                           , item_edit=1, item_pic_location=item_pic_location
                            , item_effect_columns_len=item_effect_columns_len
                            , season_item=0)
 
@@ -573,3 +573,26 @@ def inp():
 @app.route('/item_edit/<item_num>')
 def item_edit(item_num):
     return
+
+
+# 아이템 새로등록
+@app.route('/item_add/')
+def item_add():
+    # 여기서 필요한거? 딱히 없는듯......;;
+    # 목록에서 추가되는거 설정유지 해야하나?
+    # 뒤로 돌아가는거 대비?
+
+    conn = mysql.connect()
+    cursor = conn.cursor()
+
+    # 아이템 목록 설명부분을 넣어야함.
+    # 아이템 효과는 시즌템이나 아니나 무조건 동일함.
+    # 고로 어떤걸로 하던 한쪽만 가져와도 추방함.
+    cursor.execute("show FULL COLUMNS from items")
+
+    item_info_columns = cursor.fetchall()
+    print('item_info_columns: {}'.format(item_info_columns))
+    item_effect_columns_len = len(item_effect_columns)
+
+    return render_template('admin_item_info.html',
+                           item_edit=0, item_info_columns=item_info_columns)
