@@ -269,6 +269,10 @@ def trovi_ensaluti(user_id=None, pwd=None, reg=False):
     # jsoned = json.loads(player_json)
     # print('type: {} | {}'.format(type(jsoned), jsoned))
 
+    # 다 끝내면 연결 바로바로 종료시킨다.
+    cursor.close()
+    conn.close()
+
     return stringify
 
 
@@ -321,6 +325,11 @@ def debug():
     hasher = hashlib.md5()
     hasher.update(stringify)
 
+
+    # 다 끝내면 연결 바로바로 종료시킨다.
+    cursor.close()
+    conn.close()
+
     return hasher.hexdigest()
 
 
@@ -359,6 +368,10 @@ def item_info(item_num):
     item_pic_location = "pic/items/{}".format(item[3])
 
     item_effect_columns_len = len(item_effect_columns)
+
+    # 다 끝내면 연결 바로바로 종료시킨다.
+    cursor.close()
+    conn.close()
 
     # item_reg 템 등록중인가? 이 항목은 템을 등록하는게 아니라 조회하는거니 해당사항 아니다.
     return render_template("admin_item_info.html", item=item, item_info_columns=item_info_columns
@@ -436,6 +449,7 @@ def admin_player_list(page_num=1):
     return render_template('admin_player_list.html', a='1', player_list=player_list, page_num=page_num)
 
 
+# 플레이어 정보 불러오기
 @app.route('/admin/player/<player_id>')
 def admin_player_info(player_id):
     """
@@ -570,12 +584,12 @@ def inp():
 
 
 # 아이템 수정
-@app.route('/item_edit/<item_num>')
+@app.route('/item_edit/<item_num>', methods=['POST', 'GET'])
 def item_edit(item_num):
     return
 
 
-# 아이템 새로등록
+# 아이템 등록창. 여기서 등록 진행하는거 아님.
 @app.route('/item_add/')
 def item_add():
     # 여기서 필요한거? 딱히 없는듯......;;
@@ -588,11 +602,31 @@ def item_add():
     # 아이템 목록 설명부분을 넣어야함.
     # 아이템 효과는 시즌템이나 아니나 무조건 동일함.
     # 고로 어떤걸로 하던 한쪽만 가져와도 추방함.
+
+    # 템 항목 설명
     cursor.execute("show FULL COLUMNS from items")
 
     item_info_columns = cursor.fetchall()
     print('item_info_columns: {}'.format(item_info_columns))
+
+    # 템 능력치별 항목 설명ㅊ
+    cursor.execute("show FULL COLUMNS from items_effect")
+    item_effect_columns = cursor.fetchall()
     item_effect_columns_len = len(item_effect_columns)
 
-    return render_template('admin_item_info.html',
-                           item_edit=0, item_info_columns=item_info_columns)
+    # 다 끝내면 연결 바로바로 종료시킨다.
+    cursor.close()
+    conn.close()
+
+    return render_template('admin_item_info.html'
+                           , item_edit=0, item_info_columns=item_info_columns
+                           , item_effect_columns_len=item_effect_columns_len
+                           , item_effect_columns=item_effect_columns)
+
+
+# 아이템 신규등록.
+@app.route('/item_adding/', methods=['POST', 'GET'])
+def item_adding():
+
+    # 포스트 방식으로 name 태그 붙은 인풋들. 다 잘 받아지긴 함.
+    res = request.form
