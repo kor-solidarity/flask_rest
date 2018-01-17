@@ -38,10 +38,11 @@
     {#    <input type="text" name="item_name" value="{{ item_name }}">#}
 {% endif %}
 &nbsp;&nbsp;&nbsp;&nbsp;
+{# item_edit이 1일 경우 아이템 수정하는 쪽으로 가고 0이면 아이템 추가임. #}
 {% if item_edit == 1 %}
 <form id="form" action="/inp" method="post" enctype="multipart/form-data">
 {% else %}
-<form id="form" action="/item_add" method="post" enctype="multipart/form-data">
+<form id="form" action="/item_adding" method="post" enctype="multipart/form-data">
 {% endif %}
     {#여기서 사진 프리뷰가 나와야함 #}
     <img name="ori_image" height="200" width="200" id="ori_image"
@@ -52,7 +53,7 @@
         {% endif %}
 {#    <img name="ori_image" height="200" width="200" id="ori_image" src="{{ url_for('static', filename=item_pic_location) }}">#}
     <img name="image" height="200" width="200" id="image" src="{{ url_for('static', filename=item_pic_location) }}" hidden>
-    <input name="image" type="file" id="file_input"/>
+    <input name="image" type="file" accept="image/*" id="file_input"/>
         <br>
         <br>
         <table border="1">
@@ -102,7 +103,7 @@
             <td>
                 <fieldset>
                     <input type="radio" name="is_season_item" value="1"> 시즌템 <br>
-                    <input type="radio" name="is_season_item" value="0"> 일반템
+                    <input type="radio" name="is_season_item" value="0" checked> 일반템
                 </fieldset>
                 <br><span style="color: red">※ 템의 종류는 한번 설정하면 수정불가!
                 <br>&emsp; 테이블 자체가 틀림.</span>
@@ -148,9 +149,9 @@
                 <tr>
                     <th>{{ item_info_columns[-1][0] }}</th>
                     {% if item_edit %}
-                    <td><input name="item_descr" id="item_descr" value="{{ item[-1] }}"/></td>
+                    <td><input name="item_descr" id="item_rank" type="number" value="{{ item[-1] }}"/></td>
                     {% else %}
-                    <td><input name="item_descr" id="item_descr" /></td>
+                    <td><input name="item_descr" id="item_rank" type="number" value="0" /></td>
                     {% endif %}
                     <td>{{ item_info_columns[-1][-1] }}</td>
                 </tr>
@@ -184,7 +185,12 @@
         </tbody>
         </table>
     <input type="button" value="초기화" onclick="reset_data()">
+    {% if item_edit == 1 %}
     <input type="submit">
+    {% else %}
+    <input type="button" value="제출" onclick="check_input()">
+    {% endif %}
+{#    시즌템일 경우 확인. #}
     {% if season_item == 1 %}
         <input name="season_item" type="hidden" id="season_item" value="1" />
     {% else %}
@@ -220,6 +226,44 @@
         });
         $("#image").attr('hidden', 'hidden');
         $("#ori_image").removeAttr('hidden');
+    }
+
+{#   만일 item_edit 이 0일 시 사진 안넣었을 때 제약을 하나 걸어야함.  #}
+{#   확인사항들은 다음과 같다.
+     1. 이름이 있는가?
+     2. 파일이 있는가?  확장자는 사진인가?
+     3. 시즌템 여부 확인했는가? - 기본값 존재함.
+     4. 이름·설명·랭크제한은? - 랭크제한은 쓸필요없음.
+     5. 나머지 값들은 기본값이 0이라 수정 안하고 치면 진짜 다 수정 안돼버림.
+ #}
+    function check_input() {
+        alert($("#item_name").val());
+        {#파일 확장자#}
+        var ext = $("#file_input").val().split('.').pop().toLowerCase();
+        var ext_list = ['gif', 'png', 'jpg', 'jpeg']
+        {# file check #}
+        if($("#file_input").get(0).files.length == 0){
+            alert("이미지 파일이 없습니다.");
+            return;
+        }
+        {# file ext check #}
+        else if($.inArray(ext, ['gif', 'png', 'jpg', 'jpeg']) < 1){
+            alert("이미지 확장자는 " + ext_list + "만 인정됩니다.");
+            return;
+        }
+        {# 아이템명. #}
+        else if($("#item_name").val().length < 1){
+            alert("아이템명을 쓰시기 바랍니다.");
+            return;
+        }
+        {# 아이템 설명부분 #}
+        else if($("#item_descr").val().length < 1){
+                alert("아이템 설명이 없습니다.");
+                return;
+        }
+        else {
+            $("#form").submit();
+        }
     }
 </script>
 {% endblock %}

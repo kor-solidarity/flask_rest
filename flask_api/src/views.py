@@ -325,7 +325,6 @@ def debug():
     hasher = hashlib.md5()
     hasher.update(stringify)
 
-
     # 다 끝내면 연결 바로바로 종료시킨다.
     cursor.close()
     conn.close()
@@ -589,7 +588,7 @@ def item_edit(item_num):
     return
 
 
-# 아이템 등록창. 여기서 등록 진행하는거 아님.
+# 아이템 신규등록창. 여기서 등록 진행하는거 아님.
 @app.route('/item_add/')
 def item_add():
     # 여기서 필요한거? 딱히 없는듯......;;
@@ -627,6 +626,7 @@ def item_add():
 # 아이템 신규등록.
 @app.route('/item_adding/', methods=['POST', 'GET'])
 def item_adding():
-
+    print('????????')
     # 포스트 방식으로 name 태그 붙은 인풋들. 다 잘 받아지긴 함.
     res = request.form
+    return 'done'
