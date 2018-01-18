@@ -37,6 +37,21 @@ INSERT INTO `crew` (`crew_id`, `crew_name`, `crew_desc`, `crew_boundary`, `crew_
 	(3, 22223, 32, 222, 1, '');
 /*!40000 ALTER TABLE `crew` ENABLE KEYS */;
 
+-- 테이블 lifgames_railroad.crew_items 구조 내보내기
+DROP TABLE IF EXISTS `crew_items`;
+CREATE TABLE IF NOT EXISTS `crew_items` (
+  `crew_item_num` int(11) DEFAULT NULL,
+  `crew_item_name` int(11) NOT NULL COMMENT '이름',
+  `crew_item_descr` int(11) NOT NULL COMMENT '설명',
+  `crew_item_image` varchar(50) COLLATE utf8_bin NOT NULL COMMENT '이미지이름',
+  `crew_item_crew` int(11) NOT NULL COMMENT '소속된 크루 번호. 한 템은 무조건 한 크루에게만 주어진다'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='크루 전용 아이템 목록. ';
+
+-- 테이블 데이터 lifgames_railroad.crew_items:~0 rows (대략적) 내보내기
+DELETE FROM `crew_items`;
+/*!40000 ALTER TABLE `crew_items` DISABLE KEYS */;
+/*!40000 ALTER TABLE `crew_items` ENABLE KEYS */;
+
 -- 테이블 lifgames_railroad.deal_rec 구조 내보내기
 DROP TABLE IF EXISTS `deal_rec`;
 CREATE TABLE IF NOT EXISTS `deal_rec` (
@@ -62,10 +77,10 @@ DROP TABLE IF EXISTS `items`;
 CREATE TABLE IF NOT EXISTS `items` (
   `id_num` int(11) NOT NULL AUTO_INCREMENT COMMENT 'numbro de item-o. Ĉu mi devas klarigi ĉi tio?',
   `item_name` varchar(50) COLLATE utf8_bin NOT NULL COMMENT '이름',
-  `item_desc` varchar(500) COLLATE utf8_bin NOT NULL COMMENT '설명',
+  `item_desc` varchar(500) COLLATE utf8_bin NOT NULL COMMENT '설명. 이게 게임상에서 무슨템인지 설명대사 띄우는거.',
   `item_image` varchar(50) COLLATE utf8_bin NOT NULL COMMENT 'image name',
   `item_iap` int(11) NOT NULL DEFAULT '0' COMMENT '유료템인가? 0이면 아님',
-  `item_rank` int(11) NOT NULL DEFAULT '0' COMMENT '랭크제한.',
+  `item_rank` int(11) NOT NULL DEFAULT '0' COMMENT '랭크제한. 이 수치 이하면 사용 못하는거.',
   PRIMARY KEY (`id_num`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='listo de iuj en la ludo.\r\nĉiuj itemoj ne bezonas havi tekstojn en la DB.\r\n모든 아이템은 id를 같은대로 공유한다. 관리 편의성 용도.';
 
@@ -98,7 +113,7 @@ CREATE TABLE IF NOT EXISTS `items_effect` (
   `itm_obstacle_power` int(11) NOT NULL COMMENT '파괴해야하는 장애물에 대한 공격 횟수 ( ex: 1회 클릭 당 공격횟수에 영향. 공격횟수가 2일때 더블어택, 3일때 트리플어택 )',
   PRIMARY KEY (`id_num`),
   CONSTRAINT `FK__items` FOREIGN KEY (`id_num`) REFERENCES `items` (`id_num`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='템별 효과.\r\n단순 증감효과인건 굳이 + - 따로 두지 않았음. 필요시 쪼개겠음.\r\n';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='템별 효과.\r\n단순 증감효과인건 굳이 + - 따로 두지 않았음. 필요시 쪼개겠음.\r\n주의!! 이거 테이블명 수정하면 사이트를 한번 뜯어야함. 바꿀 시 무조건 통보!!! \r\n';
 
 -- 테이블 데이터 lifgames_railroad.items_effect:~0 rows (대략적) 내보내기
 DELETE FROM `items_effect`;

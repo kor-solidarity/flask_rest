@@ -30,6 +30,15 @@
     ⬜ 템 현황.
 #}
 {% block content %}
+
+
+{# item_edit이 1일 경우 아이템 수정하는 쪽으로 가고 0이면 아이템 추가임. #}
+{% if item_edit == 1 %}
+<form id="form" action="{{ url_for('inp') }}" method="post" enctype="multipart/form-data">
+{% else %}
+<form id="form" action="{{ url_for('item_adding') }}" method="post" enctype="multipart/form-data">
+{% endif %}
+
 {% if item_edit == 0 %}
     등록할 아이템 이름:
     <input type="text" name="item_name">
@@ -37,13 +46,9 @@
     {#    아이템 이름:#}
     {#    <input type="text" name="item_name" value="{{ item_name }}">#}
 {% endif %}
-&nbsp;&nbsp;&nbsp;&nbsp;
-{# item_edit이 1일 경우 아이템 수정하는 쪽으로 가고 0이면 아이템 추가임. #}
-{% if item_edit == 1 %}
-<form id="form" action="/inp" method="post" enctype="multipart/form-data">
-{% else %}
-<form id="form" action="/item_adding" method="post" enctype="multipart/form-data">
-{% endif %}
+<br>
+
+
     {#여기서 사진 프리뷰가 나와야함 #}
     <img name="ori_image" height="200" width="200" id="ori_image"
          {% if item_edit == 1 %}

@@ -290,13 +290,13 @@ def debug():
     # 친구목록 불러오기.
     # 해당 execute 자체는 목록의 수를 반환함.
     cursor.execute('SELECT friend_unique_id FROM `_friends_copy` '
-                   'WHERE player_unique_id = "{0}" '
-                   'UNION '
-                   'SELECT player_unique_id FROM `_friends_copy`'
-                   'WHERE friend_unique_id = "{0}"'.format(player_unique_id))
+                   'WHERE player_unique_id = "{0}" '.format(player_unique_id))
+                   # 'UNION '
+                   # 'SELECT player_unique_id FROM `_friends_copy`'
+                   # 'WHERE friend_unique_id = "{0}"'.format(player_unique_id))
 
     print(cursor.fetchall())
-    return 'a'
+    # return 'a'
 
     # print('res {}, type {}'.format(res, type(res)))
 
@@ -496,10 +496,10 @@ def admin_player_info(player_id):
 
     # 보유 아이템 목록
     cursor.execute('select * from _player_items a '
-                   'INNER JOIN items b on a.item_num = b.id_num where a.player_num = {0} '
-                   'UNION '
-                   'select * from _player_items a '
-                   'INNER JOIN items_iap c on a.item_num = c.id_num where a.player_num = {0}'.format(user_num))
+                   'INNER JOIN items b on a.item_num = b.id_num where a.player_num = {0} '.format(user_num))
+                   # 'UNION '
+                   # 'select * from _player_items a '
+                   # 'INNER JOIN items_iap c on a.item_num = c.id_num where a.player_num = {0}'.format(user_num))
     lists = cursor.fetchall()
     print("lists: {}".format(lists))
 
@@ -558,7 +558,7 @@ def register():
 
 
 # post 방식으로 자료받기 테스트
-@app.route('/inp', methods=['POST', 'GET'])
+@app.route('/inp/', methods=['POST', 'GET'])
 def inp():
     # 포스트 방식으로 name 태그 붙은 인풋들 다 잘 받아지긴 함.
     res = request.form
@@ -626,7 +626,53 @@ def item_add():
 # 아이템 신규등록.
 @app.route('/item_adding/', methods=['POST', 'GET'])
 def item_adding():
+
+    # 통상 여기서
     print('????????')
     # 포스트 방식으로 name 태그 붙은 인풋들. 다 잘 받아지긴 함.
     res = request.form
+
+    # 여기서 값을 가져올 시
+    # request.form.getlist('항목')[0]
+    # 위 처럼 쓴다.
+    # 없으면 아예 오류가 떠버림.
+
+    # 그리고 이건 sql 테이블명을 직접 뜯어오는 거기 때문에
+    # 테이블을 수정하면 이거 꼭!! 바꿔야 한다.
+
+    try:
+        itm_atk = request.form.getlist('itm_atk')[0]
+        itm_timer = request.form.getlist('itm_timer')[0]
+        itm_max_pause = request.form.getlist('itm_max_pause')[0]
+        itm_min_pause = request.form.getlist('itm_min_pause')[0]
+        itm_collider_size = request.form.getlist('itm_collider_size')[0]
+        itm_max_speed = request.form.getlist('itm_max_speed')[0]
+        itm_accel = request.form.getlist('itm_accel')[0]
+        itm_boost_time = request.form.getlist('itm_boost_time')[0]
+        itm_boost_spd = request.form.getlist('itm_boost_spd')[0]
+        itm_fever_gauge = request.form.getlist('itm_fever_gauge')[0]
+        itm_fever_time = request.form.getlist('itm_fever_time')[0]
+        itm_fever_bonus = request.form.getlist('itm_fever_bonus')[0]
+        itm_train_hp = request.form.getlist('itm_train_hp')[0]
+        itm_spw_chance = request.form.getlist('itm_spw_chance')[0]
+        itm_obstacle_power = request.form.getlist('itm_obstacle_power')[0]
+    # 여기에 걸리면 뭔가 기입이 빠졌다는거. 보통 빠질리가 없음.
+    except IndexError as a:
+        print(a)
+
+    # 이게 파일임. bool 적용이 되니 그걸로 판단한다.
+    try:
+        img = request.files['image']
+    # 여기 걸린다는건 업로드한 사진이 없다는거임. 여기서 걸리면 이상한거임!!!
+    except Exception as e:
+        img = False
+    # print(bool(img))
+
+    # 이거 기능: 파일명을 더 안정적인 버전으로 변환.
+    name = secure_filename(img.filename)
+    print('name: {}'.format(name))
+    print(img)
+    img.save(os.path.join(app.config['UPLOAD_FOLDER']+'/pic/items', name))
+
+    print(res)
     return 'done'
