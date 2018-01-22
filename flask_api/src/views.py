@@ -637,10 +637,17 @@ def item_adding():
     # 위 처럼 쓴다.
     # 없으면 아예 오류가 떠버림.
 
+    # phase 1. 값을 받아온다.
     # 그리고 이건 sql 테이블명을 직접 뜯어오는 거기 때문에
     # 테이블을 수정하면 이거 꼭!! 바꿔야 한다.
 
     try:
+        # 아이템 소개 부분.
+        item_name = request.form.getlist('item_name')[0]
+        item_desc = request.form.getlist('item_desc')[0]
+        item_rank = request.form.getlist('item_rank')[0]
+
+        # effects 부분
         itm_atk = request.form.getlist('itm_atk')[0]
         itm_timer = request.form.getlist('itm_timer')[0]
         itm_max_pause = request.form.getlist('itm_max_pause')[0]
@@ -660,19 +667,80 @@ def item_adding():
     except IndexError as a:
         print(a)
 
+    # phase 2. 개인|크루|시즌 템 확인여부
+    item_type = request.form.getlist('is_item_type')[0]
+
+    # 이 시점부터 서버 연결.
+    conn = mysql.connect()
+    cursor = conn.cursor()
+
+    # phase 3. 유료템 여부 확인. 다만 개인템만 유료템일 가능성이 있음
+    # 아이템타입이 0이면 개인템임
+    # phase 4병행: 템의 종류에 따라 필요한 테이블을 찾는다.
+    if item_type == 0:
+        # iap 가 존재하는가? 존재하면 유료
+        if request.form.getlist('iap'):
+            item_iap = 1
+        else:
+            item_iap = 0
+        table_name = 'items'
+        effect_table_name = 'items_effect'
+    # 1 == season_item
+    elif item_type == 1:
+        table_name = 'season_item'
+        effect_table_name = 'season_item_effect'
+    # 2 == crew_item
+    elif item_type == 2:
+        table_name = 'crew_item'
+        effect_table_name = 'crew_item_effect'
+
+    # phase 5. 테이블의 마지막 번호 추출한 후 이미지 저장한다.
+    # id_num 맨 끝번호 추출
+    cursor.execute('SELECT id_num from %s ORDER BY id_num DESC LIMIT 1'.format(table_name))
+    id_res = cursor.fetchone()
+    if id_res:
+        # 'items 12' 같은 식...
+        id_num = table_name + " " + str(int(id_res[0]) + 1)
+    else:
+        id_num = table_name + " 1"
+
     # 이게 파일임. bool 적용이 되니 그걸로 판단한다.
-    try:
-        img = request.files['image']
-    # 여기 걸린다는건 업로드한 사진이 없다는거임. 여기서 걸리면 이상한거임!!!
-    except Exception as e:
-        img = False
-    # print(bool(img))
+    img = request.files['image']
+
+    # try:
+    #     img = request.files['image']
+    # # 여기 걸린다는건 업로드한 사진이 없다는거임. 여기서 걸리면 이상한거임!!!
+    # except Exception as e:
+    #     img = False
+    # # print(bool(img))
 
     # 이거 기능: 파일명을 더 안정적인 버전으로 변환.
-    name = secure_filename(img.filename)
-    print('name: {}'.format(name))
+    file_name = secure_filename(id_num)
+    print('file_name: {}'.format(file_name))
     print(img)
-    img.save(os.path.join(app.config['UPLOAD_FOLDER']+'/pic/items', name))
+    img.save(os.path.join(app.config['UPLOAD_FOLDER']+'/pic/items', file_name))
+
+    # phase 6. 본격적으로 테이블에 인서트.
+    cursor.execute('INSERT INTO {}'
+                   '(item_name, item_desc, item_image, item_rank) '
+                   'VALUES ("{}", "{}", "{}", "{}")'
+                   .format(table_name,item_name, item_desc, file_name, item_rank))
+    # 인서트할때 등록된 item_name
+    cursor.execute('SELECT LAST_INSERT_ID()')
+    current_id = cursor.fetchone()[0]
+
+    # items_effect 인서트
+    cursor.execute('INSERT INTO items_effect'
+                   '(id_num, itm_atk, itm_timer, itm_max_pause, itm_min_pause, '
+                   'itm_collider_size, itm_max_speed, itm_accel, itm_boost_time, '
+                   'itm_boost_spd, itm_fever_gauge, itm_fever_time, itm_fever_bonus, '
+                   'itm_train_hp, itm_spw_chance, itm_obstacle_power) '
+                   'VALUES ("{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", '
+                   '"{}", "{}", "{}", "{}","{}", "{}", "{}", "{}")'
+                   .format(current_id, itm_atk, itm_timer, itm_max_pause, itm_min_pause,
+                           itm_collider_size, itm_max_speed, itm_accel, itm_boost_time,
+                           itm_boost_spd, itm_fever_gauge, itm_fever_time, itm_fever_bonus,
+                           itm_train_hp, itm_spw_chance, itm_obstacle_power))
 
     print(res)
     return 'done'

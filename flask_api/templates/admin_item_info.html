@@ -35,17 +35,14 @@
 {# item_edit이 1일 경우 아이템 수정하는 쪽으로 가고 0이면 아이템 추가임. #}
 {% if item_edit == 1 %}
 <form id="form" action="{{ url_for('inp') }}" method="post" enctype="multipart/form-data">
+    사진 변경
+    <br>
 {% else %}
 <form id="form" action="{{ url_for('item_adding') }}" method="post" enctype="multipart/form-data">
+    사진 추가
+    <br>
 {% endif %}
 
-{% if item_edit == 0 %}
-    등록할 아이템 이름:
-    <input type="text" name="item_name">
-    {#    {% else %}#}
-    {#    아이템 이름:#}
-    {#    <input type="text" name="item_name" value="{{ item_name }}">#}
-{% endif %}
 <br>
 
 
@@ -106,12 +103,14 @@
     {#        엘스 == 아이템을 새로 등록하는거.#}
             {% else %}
             <td>
-                <fieldset>
-                    <input type="radio" name="is_season_item" value="1"> 시즌템 <br>
-                    <input type="radio" name="is_season_item" value="0" checked> 일반템
+                <fieldset id="item_type_check">
+                    <input type="radio" name="is_item_type" value="2"> 크루템 <br>
+                    <input type="radio" name="is_item_type" value="1"> 시즌템 <br>
+                    <input type="radio" name="is_item_type" value="0" checked> 일반템
                 </fieldset>
                 <br><span style="color: red">※ 템의 종류는 한번 설정하면 수정불가!
-                <br>&emsp; 테이블 자체가 틀림.</span>
+                <br>&emsp; 테이블 자체가 틀림.
+                <br>그리고 왼쪽 체크박스는 개인템일때만 작동.</span>
             </td>
             {% endif %}
             </tr>
@@ -189,6 +188,9 @@
             {% endfor %}
         </tbody>
         </table>
+    <br>
+    제출하기 전에 확실하게 다 썼는지 확인!!
+    <br>
     <input type="button" value="초기화" onclick="reset_data()">
     {% if item_edit == 1 %}
     <input type="submit">
@@ -270,5 +272,7 @@
             $("#form").submit();
         }
     }
+
+    
 </script>
 {% endblock %}
