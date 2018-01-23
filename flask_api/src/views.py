@@ -585,7 +585,7 @@ def inp():
 # 아이템 수정
 @app.route('/item_edit/<item_num>', methods=['POST', 'GET'])
 def item_edit(item_num):
-    return
+    return 'OK'
 
 
 # 아이템 신규등록창. 여기서 등록 진행하는거 아님.
@@ -641,35 +641,43 @@ def item_adding():
     # 그리고 이건 sql 테이블명을 직접 뜯어오는 거기 때문에
     # 테이블을 수정하면 이거 꼭!! 바꿔야 한다.
 
-    try:
-        # 아이템 소개 부분.
-        item_name = request.form.getlist('item_name')[0]
-        item_desc = request.form.getlist('item_desc')[0]
-        item_rank = request.form.getlist('item_rank')[0]
+    print(res)
 
-        # effects 부분
-        itm_atk = request.form.getlist('itm_atk')[0]
-        itm_timer = request.form.getlist('itm_timer')[0]
-        itm_max_pause = request.form.getlist('itm_max_pause')[0]
-        itm_min_pause = request.form.getlist('itm_min_pause')[0]
-        itm_collider_size = request.form.getlist('itm_collider_size')[0]
-        itm_max_speed = request.form.getlist('itm_max_speed')[0]
-        itm_accel = request.form.getlist('itm_accel')[0]
-        itm_boost_time = request.form.getlist('itm_boost_time')[0]
-        itm_boost_spd = request.form.getlist('itm_boost_spd')[0]
-        itm_fever_gauge = request.form.getlist('itm_fever_gauge')[0]
-        itm_fever_time = request.form.getlist('itm_fever_time')[0]
-        itm_fever_bonus = request.form.getlist('itm_fever_bonus')[0]
-        itm_train_hp = request.form.getlist('itm_train_hp')[0]
-        itm_spw_chance = request.form.getlist('itm_spw_chance')[0]
-        itm_obstacle_power = request.form.getlist('itm_obstacle_power')[0]
-    # 여기에 걸리면 뭔가 기입이 빠졌다는거. 보통 빠질리가 없음.
-    except IndexError as a:
-        print(a)
+    print('getting requests')
 
+    # try:
+
+    # 아이템 소개 부분.
+    item_name = request.form.getlist('item_name')[0]
+    item_desc = request.form.getlist('item_desc')[0]
+    item_rank = request.form.getlist('item_rank')[0]
+
+    # effects 부분
+    itm_atk = request.form.getlist('itm_atk')[0]
+    itm_timer = request.form.getlist('itm_timer')[0]
+    itm_max_pause = request.form.getlist('itm_max_pause')[0]
+    itm_min_pause = request.form.getlist('itm_min_pause')[0]
+    itm_collider_size = request.form.getlist('itm_collider_size')[0]
+    itm_max_speed = request.form.getlist('itm_max_speed')[0]
+    itm_accel = request.form.getlist('itm_accel')[0]
+    itm_boost_time = request.form.getlist('itm_boost_time')[0]
+    itm_boost_spd = request.form.getlist('itm_boost_spd')[0]
+    itm_fever_gauge = request.form.getlist('itm_fever_gauge')[0]
+    itm_fever_time = request.form.getlist('itm_fever_time')[0]
+    itm_fever_bonus = request.form.getlist('itm_fever_bonus')[0]
+    itm_train_hp = request.form.getlist('itm_train_hp')[0]
+    itm_spw_chance = request.form.getlist('itm_spw_chance')[0]
+    itm_obstacle_power = request.form.getlist('itm_obstacle_power')[0]
+
+    # # 여기에 걸리면 뭔가 기입이 빠졌다는거. 보통 빠질리가 없음.
+    # except IndexError as a:
+    #     print(a)
+
+    print('checking types...')
     # phase 2. 개인|크루|시즌 템 확인여부
-    item_type = request.form.getlist('is_item_type')[0]
-
+    item_type = int(request.form.getlist('is_item_type')[0])
+    print("item_type: {}".format(item_type))
+    print('connecting to sql...')
     # 이 시점부터 서버 연결.
     conn = mysql.connect()
     cursor = conn.cursor()
@@ -677,26 +685,31 @@ def item_adding():
     # phase 3. 유료템 여부 확인. 다만 개인템만 유료템일 가능성이 있음
     # 아이템타입이 0이면 개인템임
     # phase 4병행: 템의 종류에 따라 필요한 테이블을 찾는다.
+    table_name = None
+    effect_table_name = None
+    item_iap = 0
     if item_type == 0:
+        print('0')
         # iap 가 존재하는가? 존재하면 유료
         if request.form.getlist('iap'):
             item_iap = 1
-        else:
-            item_iap = 0
         table_name = 'items'
         effect_table_name = 'items_effect'
     # 1 == season_item
     elif item_type == 1:
+        print(1)
         table_name = 'season_item'
         effect_table_name = 'season_item_effect'
     # 2 == crew_item
     elif item_type == 2:
+        print(2)
         table_name = 'crew_item'
         effect_table_name = 'crew_item_effect'
 
+    print('grabbing table number, table_name == {}'.format(table_name))
     # phase 5. 테이블의 마지막 번호 추출한 후 이미지 저장한다.
     # id_num 맨 끝번호 추출
-    cursor.execute('SELECT id_num from %s ORDER BY id_num DESC LIMIT 1'.format(table_name))
+    cursor.execute('SELECT id_num from {} ORDER BY id_num DESC LIMIT 1'.format(table_name))
     id_res = cursor.fetchone()
     if id_res:
         # 'items 12' 같은 식...
@@ -704,6 +717,7 @@ def item_adding():
     else:
         id_num = table_name + " 1"
 
+    print('saving file')
     # 이게 파일임. bool 적용이 되니 그걸로 판단한다.
     img = request.files['image']
 
@@ -718,29 +732,41 @@ def item_adding():
     file_name = secure_filename(id_num)
     print('file_name: {}'.format(file_name))
     print(img)
-    img.save(os.path.join(app.config['UPLOAD_FOLDER']+'/pic/items', file_name))
+    img.save(os.path.join(app.config['UPLOAD_FOLDER']+'/pic/items'
+                          , file_name + '.{}'.format(img.filename.split('.')[-1])))
 
+    print('inserting. FINALLY.')
     # phase 6. 본격적으로 테이블에 인서트.
     cursor.execute('INSERT INTO {}'
                    '(item_name, item_desc, item_image, item_rank) '
                    'VALUES ("{}", "{}", "{}", "{}")'
-                   .format(table_name,item_name, item_desc, file_name, item_rank))
+                   .format(table_name, item_name, item_desc, file_name, item_rank))
     # 인서트할때 등록된 item_name
     cursor.execute('SELECT LAST_INSERT_ID()')
     current_id = cursor.fetchone()[0]
 
+    # 개인템인 경우 유료템인지 확인한다. 유료면 처리!
+    if item_iap == 1:
+        print('IAP!!')
+        cursor.execute('UPDATE items SET item_iap="{}" WHERE id_num="{}"'
+                       .format(item_iap, current_id))
+
     # items_effect 인서트
-    cursor.execute('INSERT INTO items_effect'
+    cursor.execute('INSERT INTO {}'
                    '(id_num, itm_atk, itm_timer, itm_max_pause, itm_min_pause, '
                    'itm_collider_size, itm_max_speed, itm_accel, itm_boost_time, '
                    'itm_boost_spd, itm_fever_gauge, itm_fever_time, itm_fever_bonus, '
                    'itm_train_hp, itm_spw_chance, itm_obstacle_power) '
                    'VALUES ("{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", '
                    '"{}", "{}", "{}", "{}","{}", "{}", "{}", "{}")'
-                   .format(current_id, itm_atk, itm_timer, itm_max_pause, itm_min_pause,
+                   .format(effect_table_name, current_id, itm_atk, itm_timer, itm_max_pause, itm_min_pause,
                            itm_collider_size, itm_max_speed, itm_accel, itm_boost_time,
                            itm_boost_spd, itm_fever_gauge, itm_fever_time, itm_fever_bonus,
                            itm_train_hp, itm_spw_chance, itm_obstacle_power))
 
-    print(res)
+    conn.commit()
+    cursor.close()
+    conn.close()
+    print('all finished')
+
     return 'done'

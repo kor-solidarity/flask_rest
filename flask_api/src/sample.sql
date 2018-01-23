@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS `items` (
   `item_iap` int(11) NOT NULL DEFAULT '0' COMMENT '유료템인가? 0이면 아님. 사실 다른 아이템은 이거 쓸일없음',
   `item_rank` int(11) NOT NULL DEFAULT '0' COMMENT '랭크제한. 이 수치 이하면 사용 못하는거.',
   PRIMARY KEY (`id_num`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='listo de iuj en la ludo.\r\nĉiuj itemoj ne bezonas havi tekstojn en la DB.\r\n모든 아이템은 id를 같은대로 공유한다. 관리 편의성 용도.';
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='listo de iuj en la ludo.\r\nĉiuj itemoj ne bezonas havi tekstojn en la DB.\r\n모든 아이템은 id를 같은대로 공유한다. 관리 편의성 용도.';
 
 -- 테이블 데이터 lifgames_railroad.items:~4 rows (대략적) 내보내기
 DELETE FROM `items`;
@@ -120,7 +120,8 @@ INSERT INTO `items` (`id_num`, `item_name`, `item_desc`, `item_image`, `item_iap
 	(1, 'goddamnit', '템 설명서', '1.png', 0, 0),
 	(2, 'second time', '두번째 템임', 'aaaa', 0, 0),
 	(3, 'yyyy', 'smth', '11', 0, 99),
-	(4, '444', 'asmt', '5511', 0, 99);
+	(4, '444', 'asmt', '5511', 0, 99),
+	(6, 'ㅎㅎㅎㅎㅎ', 'ㅆㅆㅆㅆㅆㅆ', 'items_5', 1, 0);
 /*!40000 ALTER TABLE `items` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad.items_effect 구조 내보내기
@@ -150,7 +151,8 @@ CREATE TABLE IF NOT EXISTS `items_effect` (
 DELETE FROM `items_effect`;
 /*!40000 ALTER TABLE `items_effect` DISABLE KEYS */;
 INSERT INTO `items_effect` (`id_num`, `itm_atk`, `itm_timer`, `itm_max_pause`, `itm_min_pause`, `itm_collider_size`, `itm_max_speed`, `itm_accel`, `itm_boost_time`, `itm_boost_spd`, `itm_fever_gauge`, `itm_fever_time`, `itm_fever_bonus`, `itm_train_hp`, `itm_spw_chance`, `itm_obstacle_power`) VALUES
-	(1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+	(1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
+	(6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 /*!40000 ALTER TABLE `items_effect` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad.items_iap 구조 내보내기

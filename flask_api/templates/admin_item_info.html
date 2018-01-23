@@ -34,7 +34,7 @@
 
 {# item_edit이 1일 경우 아이템 수정하는 쪽으로 가고 0이면 아이템 추가임. #}
 {% if item_edit == 1 %}
-<form id="form" action="{{ url_for('inp') }}" method="post" enctype="multipart/form-data">
+<form id="form" action="{{ url_for('item_edit', item_num=item[0]) }}" method="post" enctype="multipart/form-data">
     사진 변경
     <br>
 {% else %}
@@ -142,9 +142,9 @@
                     <th>{{ item_info_columns[2][0] }}</th>
                         <td>
                             {% if item_edit %}
-                                <textarea name="item_descr" rows="2" cols="60" id="item_descr">{{ item[2] }}</textarea>
+                                <textarea name="item_desc" rows="2" cols="60" id="item_desc">{{ item[2] }}</textarea>
                             {% else %}
-                                <textarea name="item_descr" rows="2" cols="60" id="item_descr"></textarea>
+                                <textarea name="item_desc" rows="2" cols="60" id="item_desc"></textarea>
                             {% endif %}
                         </td>
                     <td>{{ item_info_columns[2][-1] }}</td>
@@ -153,9 +153,9 @@
                 <tr>
                     <th>{{ item_info_columns[-1][0] }}</th>
                     {% if item_edit %}
-                    <td><input name="item_descr" id="item_rank" type="number" value="{{ item[-1] }}"/></td>
+                    <td><input name="item_rank" id="item_rank" type="number" value="{{ item[-1] }}"/></td>
                     {% else %}
-                    <td><input name="item_descr" id="item_rank" type="number" value="0" /></td>
+                    <td><input name="item_rank" id="item_rank" type="number" value="0" /></td>
                     {% endif %}
                     <td>{{ item_info_columns[-1][-1] }}</td>
                 </tr>
@@ -264,7 +264,7 @@
             return;
         }
         {# 아이템 설명부분 #}
-        else if($("#item_descr").val().length < 1){
+        else if($("#item_desc").val().length < 1){
                 alert("아이템 설명이 없습니다.");
                 return;
         }
