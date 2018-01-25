@@ -332,32 +332,62 @@ def debug():
     return hasher.hexdigest()
 
 
-@app.route('/item/<item_num>')
-def item_info(item_num):
+@app.route('/item/<item_type>/<item_num>')
+def item_info(item_type, item_num):
     """
     템 정보 조회·수정·삭제기능
+    :param type: 아이템의 유형. 저게 뭐냐에 따라 갈린다.
     :param item_num: 아이템 번호.
     :return:
     """
 
+    # 아이템의 종류. 크루템, 시즌템, 개인템 세종류가 있으니 그에 맞춘다.
+    type_list = ['crew', 'season', 'prsn']
+    type_mismatch = True
+    # 여기에 걸린다면 type 주소가 잘못됐단 소리. 오류 반환한다.
+    # 추후에 이렇게 하지 말고 그냥 이전 페이지로 날려야함. 현재 그 페이지가 없는 상황.
+    for ty in type_list:
+        if ty == item_type:
+            type_mismatch = False
+            break
+    if type_mismatch:
+        return 'FAIL! NO SUCH type'
+
+    # 테이블 이름
+    table = None
+    # 효과 테이블 이름
+    table_effect = None
+    # item_type에 따라 크루템인지 개인템인지 시즌템인지 등 확인.
+    if item_type == 'crew':
+        table = 'crew_item'
+        table_effect = 'crew_item_effect'
+    elif item_type == 'season':
+        table = 'season_item'
+        table_effect = 'season_item_effect'
+    elif item_type == 'prsn':
+        table = 'items'
+        table_effect = 'items_effect'
+
     conn = mysql.connect()
     cursor = conn.cursor()
-    cursor.execute('show FULL COLUMNS from items_effect')
+
+    cursor.execute('show FULL COLUMNS from {}'.format(table_effect))
     # 아이템 능력치 항목(칼럼)명들.
     item_effect_columns = cursor.fetchall()
     print("effect: {}".format(item_effect_columns))
     print('\n {}'.format(item_effect_columns[0]))
 
-    cursor.execute("select * from items WHERE id_num = {}".format(item_num))
+    # 해당 템의 아이디번호
+    cursor.execute("select * from {} WHERE id_num = {}".format(table, item_num))
     item = cursor.fetchone()
     print("item: {}".format(item))
 
-    cursor.execute("show FULL COLUMNS from items")
+    cursor.execute("show FULL COLUMNS from {}".format(table))
     # 아이템 정보 관련
     item_info_columns = cursor.fetchall()
     print('item_info_columns: {}'.format(item_info_columns))
 
-    cursor.execute("select * from items_effect WHERE id_num = {}".format(item_num))
+    cursor.execute("select * from {} WHERE id_num = {}".format(table_effect, item_num))
     item_info = cursor.fetchone()
     print('info: {}'.format(item_info))
 
@@ -378,7 +408,7 @@ def item_info(item_num):
                            , item_info=item_info
                            , item_edit=1, item_pic_location=item_pic_location
                            , item_effect_columns_len=item_effect_columns_len
-                           , season_item=0)
+                           , type=item_type)
 
 
 @app.route('/a/')
@@ -446,6 +476,11 @@ def admin_player_list(page_num=1):
     conn.close()
 
     return render_template('admin_player_list.html', a='1', player_list=player_list, page_num=page_num)
+
+
+# @app.route('/admin/item_list/<item_type>/<page_num>')
+# def admin_item_list(item_type, page_num=1):
+
 
 
 # 플레이어 정보 불러오기
@@ -516,9 +551,9 @@ def admin_player_info(player_id):
                            , user_id=user_id, money=money)
 
 
+# 관리자 계정으로 로그인 절차. 당장은 그냥 되는걸로.
 @app.route('/admin_login/')
 def admin_login():
-    # 관리자 계정으로 로그인 절차. 당장은 그냥 되는걸로.
     return
 
 
@@ -583,8 +618,100 @@ def inp():
 
 
 # 아이템 수정
-@app.route('/item_edit/<item_num>', methods=['POST', 'GET'])
-def item_edit(item_num):
+@app.route('/item_edit/<item_type>/<item_num>', methods=['POST', 'GET'])
+def item_edit(item_type, item_num):
+    """
+
+    :param item_num:
+    :return:
+    """
+
+    # phase 1. 우선 리퀘스트를 싹 다 가져온다.
+
+    # 아이템 소개 부분.
+    item_name = request.form.getlist('item_name')[0]
+    item_desc = request.form.getlist('item_desc')[0]
+    item_rank = request.form.getlist('item_rank')[0]
+
+    # effects 부분
+    itm_atk = request.form.getlist('itm_atk')[0]
+    itm_timer = request.form.getlist('itm_timer')[0]
+    itm_max_pause = request.form.getlist('itm_max_pause')[0]
+    itm_min_pause = request.form.getlist('itm_min_pause')[0]
+    itm_collider_size = request.form.getlist('itm_collider_size')[0]
+    itm_max_speed = request.form.getlist('itm_max_speed')[0]
+    itm_accel = request.form.getlist('itm_accel')[0]
+    itm_boost_time = request.form.getlist('itm_boost_time')[0]
+    itm_boost_spd = request.form.getlist('itm_boost_spd')[0]
+    itm_fever_gauge = request.form.getlist('itm_fever_gauge')[0]
+    itm_fever_time = request.form.getlist('itm_fever_time')[0]
+    itm_fever_bonus = request.form.getlist('itm_fever_bonus')[0]
+    itm_train_hp = request.form.getlist('itm_train_hp')[0]
+    itm_spw_chance = request.form.getlist('itm_spw_chance')[0]
+    itm_obstacle_power = request.form.getlist('itm_obstacle_power')[0]
+
+    print('checking types...')
+    # phase 2. 개인|크루|시즌 템타입 확인여부
+    # item_type = int(request.form.getlist('is_item_type')[0])
+    print("item_type: {}".format(item_type))
+    print('connecting to sql...')
+
+    table = ''
+    table_effect = ''
+    # item_type에 따라 크루템인지 개인템인지 시즌템인지 등 확인.
+    if item_type == 'crew':
+        table = 'crew_item'
+        table_effect = 'crew_item_effect'
+    elif item_type == 'season':
+        table = 'season_item'
+        table_effect = 'season_item_effect'
+    elif item_type == 'prsn':
+        table = 'items'
+        table_effect = 'items_effect'
+
+    # 이 시점부터 서버 연결.
+    conn = mysql.connect()
+    cursor = conn.cursor()
+
+    # phase 3. 이미지 확인.
+
+    print('saving file')
+    # 이게 파일임. bool 적용이 되니 그걸로 판단한다.
+    try:
+        img = request.files['image']
+    # 여기 걸린다는건 업로드한 사진이 없다는거임.
+    except Exception as e:
+        img = False
+
+    # 사진이 있을 경우 원래의 파일명으로 덮어씌운다. 없으면 넘기는거.
+    if img:
+        cursor.execute('SELECT item_image FROM {} WHERE id_num={}'.format(table, item_num))
+        img_name = cursor.fetchone()[0]
+        img.save(os.path.join(app.config['UPLOAD_FOLDER']+'/pic/items', img_name))
+
+    # phase 4. 유료템 여부 확인.
+    if request.form.getlist('iap'):
+        cursor.execute('UPDATE {} SET item_iap=1 WHERE id_num = {}'.format(table, item_num))
+    else:
+        cursor.execute('UPDATE {} SET item_iap=0 WHERE id_num = {}'.format(table, item_num))
+
+    # phase 5. 수정 실시.
+    cursor.execute('UPDATE {} SET itm_atk={}'
+                   ', itm_timer={}, itm_max_pause={}, itm_min_pause={}'
+                   ', itm_collider_size={}, itm_max_speed={}, itm_accel={}'
+                   ', itm_boost_time={}, itm_boost_spd={}, itm_fever_gauge={}'
+                   ', itm_fever_time={}, itm_fever_bonus={}, itm_train_hp={}'
+                   ', itm_spw_chance={}, itm_obstacle_power={} WHERE id_num={}'
+                   .format(table_effect, itm_atk, itm_timer, itm_max_pause, itm_min_pause
+                           , itm_collider_size, itm_max_speed, itm_accel
+                           , itm_boost_time, itm_boost_spd, itm_fever_gauge
+                           , itm_fever_time, itm_fever_bonus, itm_train_hp
+                           , itm_spw_chance, itm_obstacle_power, item_num))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
     return 'OK'
 
 

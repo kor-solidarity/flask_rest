@@ -42,11 +42,11 @@ DROP TABLE IF EXISTS `crew_item`;
 CREATE TABLE IF NOT EXISTS `crew_item` (
   `id_num` int(11) NOT NULL AUTO_INCREMENT COMMENT '고유번호',
   `item_name` int(11) NOT NULL COMMENT '이름',
-  `item_descr` int(11) NOT NULL COMMENT '설명',
+  `item_desc` int(11) NOT NULL COMMENT '설명',
   `item_image` varchar(50) COLLATE utf8_bin NOT NULL COMMENT '이미지이름',
   `item_iap` int(11) NOT NULL DEFAULT '0' COMMENT '유료템인가? 0이면 아님',
   `item_rank` int(11) NOT NULL COMMENT '랭크제한. 이 수치 이하면 사용 못하는거.',
-  `item_crew` int(11) NOT NULL DEFAULT '0' COMMENT '소속된 크루 번호. 한 템은 무조건 한 크루에게만 주어진다',
+  `item_crew` int(11) NOT NULL DEFAULT '0' COMMENT '소속된 크루 번호. 한 템은 무조건 한 크루에게만 주어진다. 현 수정창에서는 사용곤란',
   PRIMARY KEY (`id_num`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='크루 전용 아이템 목록. ';
 
@@ -113,15 +113,12 @@ CREATE TABLE IF NOT EXISTS `items` (
   PRIMARY KEY (`id_num`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='listo de iuj en la ludo.\r\nĉiuj itemoj ne bezonas havi tekstojn en la DB.\r\n모든 아이템은 id를 같은대로 공유한다. 관리 편의성 용도.';
 
--- 테이블 데이터 lifgames_railroad.items:~4 rows (대략적) 내보내기
+-- 테이블 데이터 lifgames_railroad.items:~2 rows (대략적) 내보내기
 DELETE FROM `items`;
 /*!40000 ALTER TABLE `items` DISABLE KEYS */;
 INSERT INTO `items` (`id_num`, `item_name`, `item_desc`, `item_image`, `item_iap`, `item_rank`) VALUES
-	(1, 'goddamnit', '템 설명서', '1.png', 0, 0),
-	(2, 'second time', '두번째 템임', 'aaaa', 0, 0),
-	(3, 'yyyy', 'smth', '11', 0, 99),
-	(4, '444', 'asmt', '5511', 0, 99),
-	(6, 'ㅎㅎㅎㅎㅎ', 'ㅆㅆㅆㅆㅆㅆ', 'items_5', 1, 0);
+	(1, 'goddamnit', '템 설명서', '1.png', 1, 0),
+	(6, 'ㅎㅎㅎㅎㅎ', 'ㅆㅆㅆㅆㅆㅆ', 'items_5.png', 1, 0);
 /*!40000 ALTER TABLE `items` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad.items_effect 구조 내보내기
@@ -147,11 +144,11 @@ CREATE TABLE IF NOT EXISTS `items_effect` (
   CONSTRAINT `FK__items` FOREIGN KEY (`id_num`) REFERENCES `items` (`id_num`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='템별 효과.\r\n단순 증감효과인건 굳이 + - 따로 두지 않았음. 필요시 쪼개겠음.\r\n주의!! 이거 테이블명 수정하면 사이트를 한번 뜯어야함. 바꿀 시 무조건 통보!!! \r\n';
 
--- 테이블 데이터 lifgames_railroad.items_effect:~0 rows (대략적) 내보내기
+-- 테이블 데이터 lifgames_railroad.items_effect:~2 rows (대략적) 내보내기
 DELETE FROM `items_effect`;
 /*!40000 ALTER TABLE `items_effect` DISABLE KEYS */;
 INSERT INTO `items_effect` (`id_num`, `itm_atk`, `itm_timer`, `itm_max_pause`, `itm_min_pause`, `itm_collider_size`, `itm_max_speed`, `itm_accel`, `itm_boost_time`, `itm_boost_spd`, `itm_fever_gauge`, `itm_fever_time`, `itm_fever_bonus`, `itm_train_hp`, `itm_spw_chance`, `itm_obstacle_power`) VALUES
-	(1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
+	(1, 1111, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
 	(6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 /*!40000 ALTER TABLE `items_effect` ENABLE KEYS */;
 
@@ -165,7 +162,7 @@ CREATE TABLE IF NOT EXISTS `items_iap` (
   PRIMARY KEY (`id_num`)
 ) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='유료템(in_app_purchase). 로그관리 용이성을 위해 분류.\r\nNULLIFIED';
 
--- 테이블 데이터 lifgames_railroad.items_iap:~0 rows (대략적) 내보내기
+-- 테이블 데이터 lifgames_railroad.items_iap:~1 rows (대략적) 내보내기
 DELETE FROM `items_iap`;
 /*!40000 ALTER TABLE `items_iap` DISABLE KEYS */;
 INSERT INTO `items_iap` (`id_num`, `item_nomo`, `item_klarigo`, `item_image`) VALUES
@@ -222,11 +219,11 @@ DROP TABLE IF EXISTS `season_item`;
 CREATE TABLE IF NOT EXISTS `season_item` (
   `id_num` int(11) NOT NULL AUTO_INCREMENT,
   `item_name` int(11) NOT NULL COMMENT '이름',
-  `item_descr` int(11) NOT NULL COMMENT '설명',
+  `item_desc` int(11) NOT NULL COMMENT '설명',
   `item_image` varchar(50) COLLATE utf8_bin NOT NULL COMMENT '이미지이름',
   `item_iap` int(11) NOT NULL DEFAULT '0' COMMENT '유료템인가? 0이면 아님',
   `item_rank` int(11) NOT NULL COMMENT '랭크제한. 이 수치 이하면 사용 못하는거.',
-  `item_crew` int(11) NOT NULL DEFAULT '0' COMMENT '소속된 크루 번호. 한 템은 무조건 한 크루에게만 주어진다',
+  `item_crew` int(11) NOT NULL DEFAULT '0' COMMENT '소속된 크루 번호. 한 템은 무조건 한 크루에게만 주어진다. 현 수정창에서는 사용곤란',
   PRIMARY KEY (`id_num`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='시즌아이템. 크루전용.';
 
@@ -335,7 +332,7 @@ CREATE TABLE IF NOT EXISTS `_pass` (
   CONSTRAINT `user_num` FOREIGN KEY (`user_num`) REFERENCES `_users` (`user_num`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='암호';
 
--- 테이블 데이터 lifgames_railroad._pass:~0 rows (대략적) 내보내기
+-- 테이블 데이터 lifgames_railroad._pass:~1 rows (대략적) 내보내기
 DELETE FROM `_pass`;
 /*!40000 ALTER TABLE `_pass` DISABLE KEYS */;
 INSERT INTO `_pass` (`user_num`, `pwd`) VALUES
@@ -361,7 +358,7 @@ CREATE TABLE IF NOT EXISTS `_players` (
   CONSTRAINT `player_num` FOREIGN KEY (`user_num`) REFERENCES `_users` (`user_num`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='플레이어들과 관련된 기본 사항. ';
 
--- 테이블 데이터 lifgames_railroad._players:~0 rows (대략적) 내보내기
+-- 테이블 데이터 lifgames_railroad._players:~1 rows (대략적) 내보내기
 DELETE FROM `_players`;
 /*!40000 ALTER TABLE `_players` DISABLE KEYS */;
 INSERT INTO `_players` (`player_num`, `player_unique_id`, `user_num`, `affiliated_crew_id`, `player_nick`, `player_highscore`, `reg_time`) VALUES
@@ -380,7 +377,7 @@ CREATE TABLE IF NOT EXISTS `_players_cash` (
   CONSTRAINT `FK__players_cash__players` FOREIGN KEY (`player_unique_id`) REFERENCES `_players` (`player_unique_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='게임 내 재화';
 
--- 테이블 데이터 lifgames_railroad._players_cash:~0 rows (대략적) 내보내기
+-- 테이블 데이터 lifgames_railroad._players_cash:~1 rows (대략적) 내보내기
 DELETE FROM `_players_cash`;
 /*!40000 ALTER TABLE `_players_cash` DISABLE KEYS */;
 INSERT INTO `_players_cash` (`player_unique_id`, `player_cash_1`, `player_cash_2`, `player_cash_3`, `player_cash_4`) VALUES

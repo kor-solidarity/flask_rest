@@ -34,7 +34,7 @@
 
 {# item_edit이 1일 경우 아이템 수정하는 쪽으로 가고 0이면 아이템 추가임. #}
 {% if item_edit == 1 %}
-<form id="form" action="{{ url_for('item_edit', item_num=item[0]) }}" method="post" enctype="multipart/form-data">
+<form id="form" action="{{ url_for('item_edit', item_type=type, item_num=item[0]) }}" method="post" enctype="multipart/form-data">
     사진 변경
     <br>
 {% else %}
@@ -57,6 +57,7 @@
     <img name="image" height="200" width="200" id="image" src="{{ url_for('static', filename=item_pic_location) }}" hidden>
     <input name="image" type="file" accept="image/*" id="file_input"/>
         <br>
+        <input type="button" onclick="reset_pic()" value="사진변경취소"/>
         <br>
         <table border="1">
         <tbody>
@@ -71,6 +72,7 @@
                 {% endif %}
             </tr>
             <tr>
+{#            유료템 여부 #}
                 {% if item_edit == 1 %}
                     {% if item[-2] %}
                         {% set check = 1 %}
@@ -92,13 +94,18 @@
     {#        item_edit = 1 == 아이템 수정한단 소리.#}
             {% if item_edit == 1 %}
             <td>
-                {% if season_item == 1 %}
+{#            무슨 타입인지 확인 #}
+                {% if type == 'season' %}
                 시즌템.
-                {% else %}
+                {% elif type == 'prsn' %}
                 일반템.
+                {% elif type == 'crew' %}
+                크루템.
+                {% else %}
+                오류발생. 확인요망.... 템분류가 안됨.
                 {% endif %}
                 <br><span style="color: red">※ 템의 종류는 한번 설정하면 수정불가!
-                <br>&emsp; 테이블 자체가 틀림.</span>
+                <br>&emsp; 테이블 자체가 틀림..</span>
             </td>
     {#        엘스 == 아이템을 새로 등록하는거.#}
             {% else %}
@@ -197,12 +204,10 @@
     {% else %}
     <input type="button" value="제출" onclick="check_input()">
     {% endif %}
-{#    시즌템일 경우 확인. #}
-    {% if season_item == 1 %}
-        <input name="season_item" type="hidden" id="season_item" value="1" />
-    {% else %}
-        <input name="season_item" type="hidden" id="season_item" value="0" />
-    {% endif %}
+    {# 게임 타입 관련. #}
+{#    {% if item_edit == 1 %}#}
+{#        <input name="is_item_type" type="hidden" id="is_item_type" value="{{ type }}" />#}
+{#    {% endif %}#}
     <input type="button" value="목록으로" >
 </form>
 {% endblock %}
@@ -231,6 +236,13 @@
         $("#form").each(function () {
             this.reset()
         });
+        $("#image").attr('hidden', 'hidden');
+        $("#ori_image").removeAttr('hidden');
+    }
+
+    {# 사진 초기화. #}
+    function reset_pic() {
+        $("#file_input").value = "";
         $("#image").attr('hidden', 'hidden');
         $("#ori_image").removeAttr('hidden');
     }
