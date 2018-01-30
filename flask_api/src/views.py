@@ -478,9 +478,44 @@ def admin_player_list(page_num=1):
     return render_template('admin_player_list.html', a='1', player_list=player_list, page_num=page_num)
 
 
-# @app.route('/admin/item_list/<item_type>/<page_num>')
-# def admin_item_list(item_type, page_num=1):
+@app.route('/admin/item_list', methods=['GET'])
+def admin_item_list():
+    # 관리자 창에서 템 목록을 만든다.
+    # 여기서 쓰이는 변수는 세가지
+    # 1. item_type == 템 종류(기본값은 일반템)
+    # 2. sort == 정렬기준(기본값은 번호순)
+    # 3. page_num == 페이지 번호(기본값은 당연 1)
 
+    # 1. GET 변수들 확인.
+    item_type = request.args.get('item_type')
+    sort = request.args.get('sort')
+    page_num = request.args.get('page_num')
+
+    # 테이블 기본값. 적혀있지 않거나 잘못 적혔거나 'prsn'일 경우
+    table = 'items'
+    # 정렬기준 기본값. 적혀있지 않거나 잘못 적혔거나 'id'일 경우
+    table_sort = 'id_num'
+
+    # 2. 각 타입을 확인하고 이에 맞춰서 테이블 빼온다. 또한 기입이 안돼있을 경우 기본값을 설정한다.
+    # 테이블값
+    if item_type == 'season':
+        # 시즌템일 경우
+        table = 'season_item'
+    elif item_type == 'crew':
+        # 크루템인 경우
+        table = 'crew_item'
+
+    # 정렬기준. 아래 기준중에 crew_num이 빠졌는데 이건 추후 조치필요.
+    if sort == 'pic':
+        table_sort = 'item_image'
+    elif sort == 'name':
+        table_sort = 'item_name'
+    elif sort == 'rank':
+        table_sort = 'item_rank'
+
+
+
+    return '00000'
 
 
 # 플레이어 정보 불러오기
