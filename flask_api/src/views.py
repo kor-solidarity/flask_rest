@@ -478,6 +478,7 @@ def admin_player_list(page_num=1):
     return render_template('admin_player_list.html', a='1', player_list=player_list, page_num=page_num)
 
 
+# 템 목록
 @app.route('/admin/item_list', methods=['GET'])
 def admin_item_list():
     # 관리자 창에서 템 목록을 만든다.
@@ -490,6 +491,9 @@ def admin_item_list():
     item_type = request.args.get('item_type')
     sort = request.args.get('sort')
     page_num = request.args.get('page_num')
+
+    # 한 페이지에 띄울 게시물 수
+    base_rows = 50
 
     # 테이블 기본값. 적혀있지 않거나 잘못 적혔거나 'prsn'일 경우
     table = 'items'
@@ -513,7 +517,29 @@ def admin_item_list():
     elif sort == 'rank':
         table_sort = 'item_rank'
 
+    try:
+        # 페이지 번호. 근데 번호가 기입되지 않은 경우에는?? 1로 초기화한다.
+        if int(page_num):
+            if int(page_num) < 1:
+                page_numbro = 1
+            else:
+                page_numbro = int(page_num)
+    except:
+        page_numbro = 1
 
+    # 2. 테이블을 열고 자료를 가져온다.
+    conn = mysql.connect()
+    cursor = conn.cursor()
+
+    # 먼져 위에 페이지 번호에 맞는지부터 확인을 해야함.
+    cursor.execute('SELECT count(*) FROM items')
+    totalnum = cursor.fetchone()[0]
+    # print(totalnum)
+    # 틀림. 손봐야함.
+    if (totalnum / base_rows) < 1:
+        page_numbro = 1
+
+    cursor.execute('SELECT * FROM items LIMIT 0, 50')
 
     return '00000'
 
