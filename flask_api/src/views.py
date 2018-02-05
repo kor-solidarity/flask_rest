@@ -535,11 +535,19 @@ def admin_item_list():
     cursor.execute('SELECT count(*) FROM items')
     totalnum = cursor.fetchone()[0]
     # print(totalnum)
-    # 틀림. 손봐야함.
+    # 50개 이하면 페이지가 하나뿐이니 1로 값 초기화.
     if (totalnum / base_rows) < 1:
         page_numbro = 1
 
-    cursor.execute('SELECT * FROM items LIMIT 0, 50')
+    # 페이징 시작할때 번호.
+    page_starting_number = 50 * (page_numbro - 1)
+
+    cursor.execute('SELECT * FROM items LIMIT {}, 50'.format(page_starting_number))
+
+    items = cursor.fetchall()
+
+    print(items)
+
 
     return '00000'
 
