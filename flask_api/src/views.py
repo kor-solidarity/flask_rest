@@ -4,6 +4,7 @@ import hashlib
 import json
 import random
 import os
+import math
 
 from flask_api import app, mysql
 from .defs import pwd, verify
@@ -516,6 +517,8 @@ def admin_item_list():
         table_sort = 'item_name'
     elif sort == 'rank':
         table_sort = 'item_rank'
+    elif sort == 'id':
+        table_sort = 'id_num'
 
     try:
         # 페이지 번호. 근데 번호가 기입되지 않은 경우에는?? 1로 초기화한다.
@@ -524,6 +527,9 @@ def admin_item_list():
                 page_numbro = 1
             else:
                 page_numbro = int(page_num)
+
+        else:
+            page_numbro = 1
     except:
         page_numbro = 1
 
@@ -532,24 +538,40 @@ def admin_item_list():
     cursor = conn.cursor()
 
     # 먼져 위에 페이지 번호에 맞는지부터 확인을 해야함.
-    cursor.execute('SELECT count(*) FROM items')
+    cursor.execute('SELECT count(*) FROM {}'.format(table))
     totalnum = cursor.fetchone()[0]
     # print(totalnum)
     # 50개 이하면 페이지가 하나뿐이니 1로 값 초기화.
     if (totalnum / base_rows) < 1:
         page_numbro = 1
 
-    # 페이징 시작할때 번호.
-    page_starting_number = 50 * (page_numbro - 1)
+    # 여기서 나오는 최대 페이지 수.
+    total_page = math.ceil(totalnum / base_rows)
 
-    cursor.execute('SELECT * FROM items LIMIT {}, 50'.format(page_starting_number))
+    # 페이징 - 몇번글부터 읽어들이는가?
+    starting_number = base_rows * (page_numbro - 1)
+
+    # 3. 템 목록 빼오기. 일반템이면 위, 그외는 아래.
+    if table == 'items':
+        crew_check = False
+        cursor.execute('SELECT i.id_num, i.item_name, i.item_image '
+                       ', i.item_iap, i.item_rank FROM {} i LIMIT {}, 50'.format(table, starting_number))
+    else:
+        crew_check = True
+        # 일반템이 아닌 경우에는 소속된 크루가 있기에 같이 빼와야 한다.
+        cursor.execute(
+            'select i.id_num, i.item_name, i.item_image'
+            ', i.item_iap, i.item_rank, i.item_crew , c.crew_name '
+            'from {} i left join crew c on c.crew_id = i.item_crew'.format(table))
 
     items = cursor.fetchall()
 
     print(items)
+    print('crew_check: ', crew_check)
 
-
-    return '00000'
+    return render_template('admin_item_list.html', item_list=items, crew_check=crew_check
+                           , total_page=total_page, current_page=page_numbro
+                           , item_type=item_type)
 
 
 # 플레이어 정보 불러오기

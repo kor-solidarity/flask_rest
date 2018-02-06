@@ -9,13 +9,33 @@
     <tr>
         <th>#</th>
         <th>사진</th>
-        <th>템종류</th>
         <th>이름</th>
         <th>유료여부</th>
         <th>랭크제한</th>
         <th>소속크루</th>
     </tr>
     {% for item in item_list %}
+{#사실상 뭘 누르던 다 해당 아이템으로 가게끔 한다.#}
+{#        현재 미완성 상태임. url_for 에 GET 파라미터를 넘길 수 있는가?? #}
+        <td><a href="{{ url_for('item_info') }}">{{ item[0] }}</a></td>
+{#       사진 #}
+        <td><a><img src="{{ url_for('static') }}" width="100"></a></td>
+{#이름#}
+        <td>{{ item[0] }}</td>
+{#        유료?#}
+        <td>{{ item[0] }}</td>
+{#        rank#}
+        <td>{{ item[0] }}</td>
+{#   일반템이면 이걸 쓸 이유가 없음. #}
+    {% if crew_check %}
+        {% if item[-2] == 0 %}
+        <td>미배정</td>
+        {% else %}
+        <td>{{ item[-1] }}</td>
+        {% endif %}
+    {% else %}
+        <td>일반템 - 소속 無</td>
+    {% endif %}
     <tr>
 
     </tr>
