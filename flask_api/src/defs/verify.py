@@ -25,7 +25,7 @@ def kontroli(identify, chifro):
     print('user_num', user_num)
     print('type:', type(user_num))
     print(bool(user_num))
-    # 유저넘이 없다는건 없는 아이디라는 소리.
+    # ne user_num signifas tie ne estas tiel ID.
     if not user_num:
         # return 'FAIL - no such ID'
         return False

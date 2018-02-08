@@ -34,7 +34,7 @@
 
 {# item_edit이 1일 경우 아이템 수정하는 쪽으로 가고 0이면 아이템 추가임. #}
 {% if item_edit == 1 %}
-<form id="form" action="{{ url_for('item_edit', item_type=type, item_num=item[0]) }}" method="post" enctype="multipart/form-data">
+<form id="form" action="{{ url_for('item_edit', item_type=type, item_num=item[0], page_num=page_num) }}" method="post" enctype="multipart/form-data">
     사진 변경
     <br>
 {% else %}

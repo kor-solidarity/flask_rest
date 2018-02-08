@@ -11,7 +11,7 @@ from .defs import pwd, verify
 from .constants import *
 from werkzeug.utils import secure_filename
 
-from flask import request, jsonify, render_template
+from flask import request, jsonify, render_template, redirect, url_for
 
 APP_ROUTE = os.path.dirname(os.path.abspath(__file__))
 
@@ -479,101 +479,6 @@ def admin_player_list(page_num=1):
     return render_template('admin_player_list.html', a='1', player_list=player_list, page_num=page_num)
 
 
-# 템 목록
-@app.route('/admin/item_list', methods=['GET'])
-def admin_item_list():
-    # 관리자 창에서 템 목록을 만든다.
-    # 여기서 쓰이는 변수는 세가지
-    # 1. item_type == 템 종류(기본값은 일반템)
-    # 2. sort == 정렬기준(기본값은 번호순)
-    # 3. page_num == 페이지 번호(기본값은 당연 1)
-
-    # 1. GET 변수들 확인.
-    item_type = request.args.get('item_type')
-    sort = request.args.get('sort')
-    page_num = request.args.get('page_num')
-
-    # 한 페이지에 띄울 게시물 수
-    base_rows = 50
-
-    # 테이블 기본값. 적혀있지 않거나 잘못 적혔거나 'prsn'일 경우
-    table = 'items'
-    # 정렬기준 기본값. 적혀있지 않거나 잘못 적혔거나 'id'일 경우
-    table_sort = 'id_num'
-
-    # 2. 각 타입을 확인하고 이에 맞춰서 테이블 빼온다. 또한 기입이 안돼있을 경우 기본값을 설정한다.
-    # 테이블값
-    if item_type == 'season':
-        # 시즌템일 경우
-        table = 'season_item'
-    elif item_type == 'crew':
-        # 크루템인 경우
-        table = 'crew_item'
-
-    # 정렬기준. 아래 기준중에 crew_num이 빠졌는데 이건 추후 조치필요.
-    if sort == 'pic':
-        table_sort = 'item_image'
-    elif sort == 'name':
-        table_sort = 'item_name'
-    elif sort == 'rank':
-        table_sort = 'item_rank'
-    elif sort == 'id':
-        table_sort = 'id_num'
-
-    try:
-        # 페이지 번호. 근데 번호가 기입되지 않은 경우에는?? 1로 초기화한다.
-        if int(page_num):
-            if int(page_num) < 1:
-                page_numbro = 1
-            else:
-                page_numbro = int(page_num)
-
-        else:
-            page_numbro = 1
-    except:
-        page_numbro = 1
-
-    # 2. 테이블을 열고 자료를 가져온다.
-    conn = mysql.connect()
-    cursor = conn.cursor()
-
-    # 먼져 위에 페이지 번호에 맞는지부터 확인을 해야함.
-    cursor.execute('SELECT count(*) FROM {}'.format(table))
-    totalnum = cursor.fetchone()[0]
-    # print(totalnum)
-    # 50개 이하면 페이지가 하나뿐이니 1로 값 초기화.
-    if (totalnum / base_rows) < 1:
-        page_numbro = 1
-
-    # 여기서 나오는 최대 페이지 수.
-    total_page = math.ceil(totalnum / base_rows)
-
-    # 페이징 - 몇번글부터 읽어들이는가?
-    starting_number = base_rows * (page_numbro - 1)
-
-    # 3. 템 목록 빼오기. 일반템이면 위, 그외는 아래.
-    if table == 'items':
-        crew_check = False
-        cursor.execute('SELECT i.id_num, i.item_name, i.item_image '
-                       ', i.item_iap, i.item_rank FROM {} i LIMIT {}, 50'.format(table, starting_number))
-    else:
-        crew_check = True
-        # 일반템이 아닌 경우에는 소속된 크루가 있기에 같이 빼와야 한다.
-        cursor.execute(
-            'select i.id_num, i.item_name, i.item_image'
-            ', i.item_iap, i.item_rank, i.item_crew , c.crew_name '
-            'from {} i left join crew c on c.crew_id = i.item_crew'.format(table))
-
-    items = cursor.fetchall()
-
-    print(items)
-    print('crew_check: ', crew_check)
-
-    return render_template('admin_item_list.html', item_list=items, crew_check=crew_check
-                           , total_page=total_page, current_page=page_numbro
-                           , item_type=item_type)
-
-
 # 플레이어 정보 불러오기
 @app.route('/admin/player/<player_id>')
 def admin_player_info(player_id):
@@ -708,11 +613,125 @@ def inp():
     return 'um??'
 
 
-# 아이템 수정
+# 템 목록
+@app.route('/admin/item_list', methods=['GET', 'POST'])
+def admin_item_list():
+    # 관리자 창에서 템 목록을 만든다.
+    # 여기서 쓰이는 변수는 세가지
+    # 1. item_type == 템 종류(기본값은 일반템)
+    # 2. sort == 정렬기준(기본값은 번호순)
+    # 3. page_num == 페이지 번호(기본값은 당연 1)
+
+    # get, post ambaŭ povas ekzisti.
+    if request.method == 'POST':
+        # POST params
+        res = request.form
+        print('res: ', res)
+        item_type = res.getlist('item_type')[0]
+        sort = res.getlist('sort')[0]
+        try:
+            page_num = res.getlist('page_num')[0]
+        except IndexError:
+            page_num = 1
+
+    else:
+        # 1. GET 변수들 확인.
+        item_type = request.args.get('item_type')
+        sort = request.args.get('sort')
+        try:
+            page_num = request.args.get('page_num')
+        except IndexError:
+            page_num = 1
+    # 한 페이지에 띄울 게시물 수
+    base_rows = 50
+
+    # 테이블 기본값. 적혀있지 않거나 잘못 적혔거나 'prsn'일 경우
+    table = 'items'
+    # 정렬기준 기본값. 적혀있지 않거나 잘못 적혔거나 'id'일 경우
+    table_sort = 'id_num'
+
+    # 2. 각 타입을 확인하고 이에 맞춰서 테이블 빼온다. 또한 기입이 안돼있을 경우 기본값을 설정한다.
+    # 테이블값
+    if item_type == 'season':
+        # 시즌템일 경우
+        table = 'season_item'
+    elif item_type == 'crew':
+        # 크루템인 경우
+        table = 'crew_item'
+    else:
+        item_type = 'prsn'
+        table = 'items'
+
+    # 정렬기준. 아래 기준중에 crew_num이 빠졌는데 이건 추후 조치필요.
+    if sort == 'name':
+        table_sort = 'item_name'
+    elif sort == 'rank':
+        table_sort = 'item_rank'
+    elif sort == 'id':
+        table_sort = 'id_num'
+    else:
+        sort = 'id'
+        table_sort = 'id_num'
+
+    try:
+        # 페이지 번호. 근데 번호가 기입되지 않은 경우에는?? 1로 초기화한다.
+        if int(page_num):
+            if int(page_num) < 1:
+                page_numbro = 1
+            else:
+                page_numbro = int(page_num)
+
+        else:
+            page_numbro = 1
+    except:
+        page_numbro = 1
+
+    # 2. 테이블을 열고 자료를 가져온다.
+    conn = mysql.connect()
+    cursor = conn.cursor()
+
+    # 먼져 위에 페이지 번호에 맞는지부터 확인을 해야함.
+    cursor.execute('SELECT count(*) FROM {}'.format(table))
+    totalnum = cursor.fetchone()[0]
+    # print(totalnum)
+    # 50개 이하면 페이지가 하나뿐이니 1로 값 초기화.
+    if (totalnum / base_rows) < 1:
+        page_numbro = 1
+
+    # 여기서 나오는 최대 페이지 수.
+    total_page = math.ceil(totalnum / base_rows)
+
+    # 페이징 - 몇번글부터 읽어들이는가?
+    starting_number = base_rows * (page_numbro - 1)
+
+    # 3. 템 목록 빼오기. 일반템이면 위, 그외는 아래.
+    if table == 'items':
+        crew_check = False
+        cursor.execute('SELECT i.id_num, i.item_name, i.item_image '
+                       ', i.item_iap, i.item_rank FROM {} i LIMIT {}, 50'.format(table, starting_number))
+    else:
+        crew_check = True
+        # 일반템이 아닌 경우에는 소속된 크루가 있기에 같이 빼와야 한다.
+        cursor.execute(
+            'select i.id_num, i.item_name, i.item_image'
+            ', i.item_iap, i.item_rank, i.item_crew , c.crew_name '
+            'from {} i left join crew c on c.crew_id = i.item_crew'.format(table))
+
+    items = cursor.fetchall()
+
+    print(items)
+    print('crew_check: ', crew_check)
+
+    return render_template('admin_item_list.html', item_list=items, crew_check=crew_check
+                           , total_page=total_page, current_page=page_numbro
+                           , item_type=item_type, sort_type=sort)
+
+
+# 아이템 수정창 띄운다. 템 관리목록에서 템 누르면 뜨는부분.
 @app.route('/item_edit/<item_type>/<item_num>', methods=['POST', 'GET'])
 def item_edit(item_type, item_num):
     """
-
+    :param item_type:
     :param item_num:
     :return:
     """
@@ -723,6 +742,11 @@ def item_edit(item_type, item_num):
     item_name = request.form.getlist('item_name')[0]
     item_desc = request.form.getlist('item_desc')[0]
     item_rank = request.form.getlist('item_rank')[0]
+
+    try:
+        page_num = request.form.getlist('page_num')[0]
+    except IndexError:
+        page_num = 1
 
     # effects 부분
     itm_atk = request.form.getlist('itm_atk')[0]
@@ -778,7 +802,18 @@ def item_edit(item_type, item_num):
     if img:
         cursor.execute('SELECT item_image FROM {} WHERE id_num={}'.format(table, item_num))
         img_name = cursor.fetchone()[0]
+        try:
+            # 기존 사진 삭제
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER']+'/pic/items', img_name))
+        # se ne povas serĉi la bildon, ĵus pasu.
+        except FileNotFoundError:
+            pass
+        extension = img.filename.split('.')[-1]
+        img_name = img_name.split('.')[0] + '.{}'.format(extension)
+        # 새로 저장
         img.save(os.path.join(app.config['UPLOAD_FOLDER']+'/pic/items', img_name))
+        # update.
+        cursor.execute('UPDATE {} SET item_image="{}" WHERE id_num={}'.format(table, img_name, item_num))
 
     # phase 4. 유료템 여부 확인.
     if request.form.getlist('iap'):
@@ -803,7 +838,7 @@ def item_edit(item_type, item_num):
     cursor.close()
     conn.close()
 
-    return 'OK'
+    return redirect(url_for('admin_item_list', item_type=item_type, page_num=page_num))
 
 
 # 아이템 신규등록창. 여기서 등록 진행하는거 아님.
@@ -988,3 +1023,7 @@ def item_adding():
     print('all finished')
 
     return 'done'
+
+# 아이템 목록으로 리다렉트 시켜줌.
+def redirect_to_item_list():
+    return

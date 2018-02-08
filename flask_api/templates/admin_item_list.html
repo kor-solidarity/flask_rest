@@ -3,8 +3,62 @@
 {% block topic %}
 {# sort_type 부분 바꿔야함#}
 아이템 목록 - 종류: {{ item_type }} , 정렬기준: {{ sort_type }}
+<br><br>
+<form action="{{ url_for('admin_item_list') }}" method="post">
+    종류
+    <select name="item_type" onchange="this.form.submit()">
+        {% if item_type == 'season' %}
+        <option value="season" selected>시즌템</option>
+        {% else %}
+        <option value="season">시즌템</option>
+        {% endif %}
 
-<table>
+        {% if item_type == 'crew' %}
+        <option value="crew" selected>크루템</option>
+        {% else %}
+        <option value="crew">크루템</option>
+        {% endif %}
+
+        {% if item_type == 'prsn' %}
+        <option value="prsn" selected>일반템</option>
+        {% else %}
+        <option value="prsn">일반템</option>
+        {% endif %}
+
+    </select>
+    정렬기준
+    <select name="sort" onchange="this.form.submit()">
+        {% if sort_type == 'id' %}
+        <option value="id" selected>아이디</option>
+        {% else %}
+        <option value="id">아이디</option>
+        {%  endif %}
+
+        {% if sort_type == 'name' %}
+        <option value="name">이름</option>
+    {% else %}
+        <option value="name">이름</option>
+    {% endif %}
+
+        {% if sort_type == 'rank' %}
+        <option value="rank" selected>랭킹</option>
+        {% else %}
+        <option value="rank">랭킹</option>
+        {% endif %}
+    </select>
+
+    페이지
+    <select name="page_num" onchange="this.form.submit()">
+        {% for i in range(total_page) %}
+            {% if (i + 1) == current_page %}
+            <option value="{{ i + 1 }}" selected>{{ i + 1 }}</option>
+            {% else %}
+            <option value="{{ i + 1 }}">{{ i + 1 }}</option>
+            {% endif %}
+        {% endfor %}
+    </select>
+</form>
+<table border="1">
 
     <tr>
         <th>#</th>
@@ -14,18 +68,20 @@
         <th>랭크제한</th>
         <th>소속크루</th>
     </tr>
+    <tr>
     {% for item in item_list %}
 {#사실상 뭘 누르던 다 해당 아이템으로 가게끔 한다.#}
-{#        현재 미완성 상태임. url_for 에 GET 파라미터를 넘길 수 있는가?? #}
-        <td><a href="{{ url_for('item_info') }}">{{ item[0] }}</a></td>
+{#        현재 미완성 상태임. url_for 에 GET 파라미터를 넘길 수 있는가?? << 못함. #}
+        <td><a href="{{ url_for('item_info', item_type=item_type, item_num=item[0], page_num=current_page) }}">{{ item[0] }}</a></td>
 {#       사진 #}
-        <td><a><img src="{{ url_for('static') }}" width="100"></a></td>
+        <td><a><img src="{{ url_for('static', filename='pic/items/' + (item[2])) }}" width="100"></a></td>
+{#        <td>{{ item[2] }}</td>#}
 {#이름#}
-        <td>{{ item[0] }}</td>
+        <td>{{ item[1] }}</td>
 {#        유료?#}
-        <td>{{ item[0] }}</td>
+        <td>{{ item[3] }}</td>
 {#        rank#}
-        <td>{{ item[0] }}</td>
+        <td>{{ item[4] }}</td>
 {#   일반템이면 이걸 쓸 이유가 없음. #}
     {% if crew_check %}
         {% if item[-2] == 0 %}
@@ -36,7 +92,11 @@
     {% else %}
         <td>일반템 - 소속 無</td>
     {% endif %}
-    <tr>
-
     </tr>
+{% endfor %}
 </table>
+
+{#페이징 #}
+
+<br>
+{% endblock %}
