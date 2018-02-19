@@ -11,7 +11,8 @@ from .defs import pwd, verify
 from .constants import *
 from werkzeug.utils import secure_filename
 
-from flask import request, jsonify, render_template, redirect, url_for
+from flask import request, jsonify, render_template, redirect, url_for, session
+# from flask import *
 
 APP_ROUTE = os.path.dirname(os.path.abspath(__file__))
 
@@ -553,6 +554,12 @@ def admin_login():
     return
 
 
+@app.route('/admin_logout/')
+def admin_logout():
+    session.pop('logged_in', None)
+    redirect(url_for())
+
+
 # 회원가입
 @app.route('/register/')
 def register():
@@ -822,6 +829,7 @@ def item_edit(item_type, item_num):
         cursor.execute('UPDATE {} SET item_iap=0 WHERE id_num = {}'.format(table, item_num))
 
     # phase 5. 수정 실시.
+    # effects
     cursor.execute('UPDATE {} SET itm_atk={}'
                    ', itm_timer={}, itm_max_pause={}, itm_min_pause={}'
                    ', itm_collider_size={}, itm_max_speed={}, itm_accel={}'
@@ -833,6 +841,10 @@ def item_edit(item_type, item_num):
                            , itm_boost_time, itm_boost_spd, itm_fever_gauge
                            , itm_fever_time, itm_fever_bonus, itm_train_hp
                            , itm_spw_chance, itm_obstacle_power, item_num))
+    # names and ranks, etc.
+    cursor.execute('UPDATE {} SET item_name = "{}"'
+                   ', item_rank = {}, item_desc = "{}" WHERE id_num = {}'
+                   .format(table, item_name, item_rank, item_desc, item_num))
 
     conn.commit()
     cursor.close()
