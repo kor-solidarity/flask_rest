@@ -17,15 +17,28 @@ DROP DATABASE IF EXISTS `lifgames_railroad`;
 CREATE DATABASE IF NOT EXISTS `lifgames_railroad` /*!40100 DEFAULT CHARACTER SET utf8 COLLATE utf8_bin */;
 USE `lifgames_railroad`;
 
+-- 테이블 lifgames_railroad.admin 구조 내보내기
+DROP TABLE IF EXISTS `admin`;
+CREATE TABLE IF NOT EXISTS `admin` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `pass` varchar(100) COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='admin';
+
+-- 테이블 데이터 lifgames_railroad.admin:~0 rows (대략적) 내보내기
+DELETE FROM `admin`;
+/*!40000 ALTER TABLE `admin` DISABLE KEYS */;
+/*!40000 ALTER TABLE `admin` ENABLE KEYS */;
+
 -- 테이블 lifgames_railroad.crew 구조 내보내기
 DROP TABLE IF EXISTS `crew`;
 CREATE TABLE IF NOT EXISTS `crew` (
   `crew_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '기초적인 관리번호',
-  `crew_name` int(11) NOT NULL COMMENT '크루 이름(번호)...',
-  `crew_desc` int(11) NOT NULL COMMENT '해당 클랜의 설명',
+  `crew_name` varchar(50) COLLATE utf8_bin NOT NULL COMMENT '크루 이름...',
+  `crew_desc` int(11) NOT NULL COMMENT '해당 클랜의 설명. 그냥 내용 다 드가게 합시다... ',
   `crew_boundary` float NOT NULL DEFAULT '0' COMMENT '시즌별에 필요한건데... 클랜간의 영역 점유율. 무조건 시즌별 클랜들 이 레이트 값이 100에 맞춰져야 한다. ',
   `crew_exist` int(11) NOT NULL DEFAULT '1' COMMENT '(현 운영중인 시즌에)존재하는 크루인가? 0이면 아님.',
-  `crew_name_txt` varchar(50) COLLATE utf8_bin NOT NULL COMMENT 'nomo de crew. 클라이언트로 굳이 보내진 않지만 이쪽 자료를 위해.',
+  `crew_name_txt` varchar(50) COLLATE utf8_bin NOT NULL COMMENT 'NULLIFIED. nomo de crew. 클라이언트로 굳이 보내진 않지만 이쪽 자료를 위해.',
   PRIMARY KEY (`crew_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='클랜같은거. NPC 콥.\r\n세부적인 내용이 여기에서 저장되는 일은 없다. 모두 번호로 분류되며 클라이언트 내에서 번호에 맞춰서 불려진다. \r\n*추가사항: 아에템?';
 
@@ -33,26 +46,44 @@ CREATE TABLE IF NOT EXISTS `crew` (
 DELETE FROM `crew`;
 /*!40000 ALTER TABLE `crew` DISABLE KEYS */;
 INSERT INTO `crew` (`crew_id`, `crew_name`, `crew_desc`, `crew_boundary`, `crew_exist`, `crew_name_txt`) VALUES
-	(1, 0, 1, 33.3, 1, ''),
-	(3, 22223, 32, 222, 1, '');
+	(1, 'yolo_crew', 1, 33.3333, 1, ''),
+	(2, 'second_crew', 2, 33.3333, 1, '333'),
+	(3, '22223', 32, 33.3334, 1, '');
 /*!40000 ALTER TABLE `crew` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad.crew_item 구조 내보내기
 DROP TABLE IF EXISTS `crew_item`;
 CREATE TABLE IF NOT EXISTS `crew_item` (
   `id_num` int(11) NOT NULL AUTO_INCREMENT COMMENT '고유번호',
-  `item_name` int(11) NOT NULL COMMENT '이름',
-  `item_desc` int(11) NOT NULL COMMENT '설명',
+  `item_name` varchar(50) COLLATE utf8_bin NOT NULL COMMENT '이름',
+  `item_desc` varchar(500) COLLATE utf8_bin NOT NULL COMMENT '설명',
   `item_image` varchar(50) COLLATE utf8_bin NOT NULL COMMENT '이미지이름',
   `item_iap` int(11) NOT NULL DEFAULT '0' COMMENT '유료템인가? 0이면 아님',
   `item_rank` int(11) NOT NULL COMMENT '랭크제한. 이 수치 이하면 사용 못하는거.',
   `item_crew` int(11) NOT NULL DEFAULT '0' COMMENT '소속된 크루 번호. 한 템은 무조건 한 크루에게만 주어진다. 현 수정창에서는 사용곤란',
+  `itm_atk` int(11) NOT NULL COMMENT '공격력 효과',
+  `itm_timer` int(11) NOT NULL COMMENT '제한시간 증감효과',
+  `itm_max_pause` int(11) NOT NULL COMMENT '일정시간동안 제한시간 정지. 랜덤 범위 최대값. (상세수치는 일정 범위 안에서 랜덤.)',
+  `itm_min_pause` int(11) NOT NULL COMMENT '일정시간동안 제한시간 정지. 랜덤 범위 최소값.',
+  `itm_collider_size` int(11) NOT NULL COMMENT '판정 구간 넓이 증감',
+  `itm_max_speed` int(11) NOT NULL COMMENT '최고 속도 증감',
+  `itm_accel` int(11) NOT NULL COMMENT '가속도 증감',
+  `itm_boost_time` int(11) NOT NULL COMMENT '부스트 유지시간 증감',
+  `itm_boost_spd` int(11) NOT NULL COMMENT '부스트 속도 증감',
+  `itm_fever_gauge` int(11) NOT NULL COMMENT '피버 게이지 충전량 증감',
+  `itm_fever_time` int(11) NOT NULL COMMENT '피버 타임 유지시간 증가/감소',
+  `itm_fever_bonus` int(11) NOT NULL COMMENT '피버 타임시 점수 보너스 증가/감소',
+  `itm_train_hp` int(11) NOT NULL COMMENT '열차 체력 수치 증감',
+  `itm_spw_chance` int(11) NOT NULL COMMENT '상위 아이템 등장 확률',
+  `itm_obstacle_power` int(11) NOT NULL COMMENT '파괴해야하는 장애물에 대한 공격 횟수 ( ex: 1회 클릭 당 공격횟수에 영향. 공격횟수가 2일때 더블어택, 3일때 트리플어택 )',
   PRIMARY KEY (`id_num`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='크루 전용 아이템 목록. ';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='크루 전용 아이템 목록. ';
 
--- 테이블 데이터 lifgames_railroad.crew_item:~0 rows (대략적) 내보내기
+-- 테이블 데이터 lifgames_railroad.crew_item:~1 rows (대략적) 내보내기
 DELETE FROM `crew_item`;
 /*!40000 ALTER TABLE `crew_item` DISABLE KEYS */;
+INSERT INTO `crew_item` (`id_num`, `item_name`, `item_desc`, `item_image`, `item_iap`, `item_rank`, `item_crew`, `itm_atk`, `itm_timer`, `itm_max_pause`, `itm_min_pause`, `itm_collider_size`, `itm_max_speed`, `itm_accel`, `itm_boost_time`, `itm_boost_spd`, `itm_fever_gauge`, `itm_fever_time`, `itm_fever_bonus`, `itm_train_hp`, `itm_spw_chance`, `itm_obstacle_power`) VALUES
+	(1, '크루템', '크루템 예제로 작성한거.', 'crew_item_1.png', 0, 0, 1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
 /*!40000 ALTER TABLE `crew_item` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad.crew_item_effect 구조 내보내기
@@ -73,12 +104,16 @@ CREATE TABLE IF NOT EXISTS `crew_item_effect` (
   `itm_fever_bonus` int(11) NOT NULL COMMENT '피버 타임시 점수 보너스 증가/감소',
   `itm_train_hp` int(11) NOT NULL COMMENT '열차 체력 수치 증감',
   `itm_spw_chance` int(11) NOT NULL COMMENT '상위 아이템 등장 확률',
-  `itm_obstacle_power` int(11) NOT NULL COMMENT '파괴해야하는 장애물에 대한 공격 횟수 ( ex: 1회 클릭 당 공격횟수에 영향. 공격횟수가 2일때 더블어택, 3일때 트리플어택 )'
+  `itm_obstacle_power` int(11) NOT NULL COMMENT '파괴해야하는 장애물에 대한 공격 횟수 ( ex: 1회 클릭 당 공격횟수에 영향. 공격횟수가 2일때 더블어택, 3일때 트리플어택 )',
+  KEY `FK_crew_item_effect_crew_item` (`id_num`),
+  CONSTRAINT `FK_crew_item_effect_crew_item` FOREIGN KEY (`id_num`) REFERENCES `crew_item` (`id_num`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='크루템의 아이템 효과들\r\n';
 
 -- 테이블 데이터 lifgames_railroad.crew_item_effect:~0 rows (대략적) 내보내기
 DELETE FROM `crew_item_effect`;
 /*!40000 ALTER TABLE `crew_item_effect` DISABLE KEYS */;
+INSERT INTO `crew_item_effect` (`id_num`, `itm_atk`, `itm_timer`, `itm_max_pause`, `itm_min_pause`, `itm_collider_size`, `itm_max_speed`, `itm_accel`, `itm_boost_time`, `itm_boost_spd`, `itm_fever_gauge`, `itm_fever_time`, `itm_fever_bonus`, `itm_train_hp`, `itm_spw_chance`, `itm_obstacle_power`) VALUES
+	(1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
 /*!40000 ALTER TABLE `crew_item_effect` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad.deal_rec 구조 내보내기
@@ -110,15 +145,31 @@ CREATE TABLE IF NOT EXISTS `items` (
   `item_image` varchar(50) COLLATE utf8_bin NOT NULL COMMENT 'image name',
   `item_iap` int(11) NOT NULL DEFAULT '0' COMMENT '유료템인가? 0이면 아님. 사실 다른 아이템은 이거 쓸일없음',
   `item_rank` int(11) NOT NULL DEFAULT '0' COMMENT '랭크제한. 이 수치 이하면 사용 못하는거.',
+  `itm_atk` int(11) NOT NULL COMMENT '공격력 효과',
+  `itm_timer` int(11) NOT NULL COMMENT '제한시간 증감효과',
+  `itm_max_pause` int(11) NOT NULL COMMENT '일정시간동안 제한시간 정지. 랜덤 범위 최대값. (상세수치는 일정 범위 안에서 랜덤.)',
+  `itm_min_pause` int(11) NOT NULL COMMENT '일정시간동안 제한시간 정지. 랜덤 범위 최소값.',
+  `itm_collider_size` int(11) NOT NULL COMMENT '판정 구간 넓이 증감',
+  `itm_max_speed` int(11) NOT NULL COMMENT '최고 속도 증감',
+  `itm_accel` int(11) NOT NULL COMMENT '가속도 증감',
+  `itm_boost_time` int(11) NOT NULL COMMENT '부스트 유지시간 증감',
+  `itm_boost_spd` int(11) NOT NULL COMMENT '부스트 속도 증감',
+  `itm_fever_gauge` int(11) NOT NULL COMMENT '피버 게이지 충전량 증감',
+  `itm_fever_time` int(11) NOT NULL COMMENT '피버 타임 유지시간 증가/감소',
+  `itm_fever_bonus` int(11) NOT NULL COMMENT '피버 타임시 점수 보너스 증가/감소',
+  `itm_train_hp` int(11) NOT NULL COMMENT '열차 체력 수치 증감',
+  `itm_spw_chance` int(11) NOT NULL COMMENT '상위 아이템 등장 확률',
+  `itm_obstacle_power` int(11) NOT NULL COMMENT '파괴해야하는 장애물에 대한 공격 횟수 ( ex: 1회 클릭 당 공격횟수에 영향. 공격횟수가 2일때 더블어택, 3일때 트리플어택 )',
+  `itm_cost` int(11) NOT NULL DEFAULT '0' COMMENT '템의 가격. 유료템일 경우 한정으로만 쓰인다, ',
   PRIMARY KEY (`id_num`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='listo de iuj en la ludo.\r\nĉiuj itemoj ne bezonas havi tekstojn en la DB.\r\n모든 아이템은 id를 같은대로 공유한다. 관리 편의성 용도.';
 
 -- 테이블 데이터 lifgames_railroad.items:~2 rows (대략적) 내보내기
 DELETE FROM `items`;
 /*!40000 ALTER TABLE `items` DISABLE KEYS */;
-INSERT INTO `items` (`id_num`, `item_name`, `item_desc`, `item_image`, `item_iap`, `item_rank`) VALUES
-	(1, 'goddamnit', '템 설명서', '1.png', 1, 0),
-	(6, 'ㅎㅎㅎㅎㅎ', 'ㅆㅆㅆㅆㅆㅆ', 'items_5.png', 1, 0);
+INSERT INTO `items` (`id_num`, `item_name`, `item_desc`, `item_image`, `item_iap`, `item_rank`, `itm_atk`, `itm_timer`, `itm_max_pause`, `itm_min_pause`, `itm_collider_size`, `itm_max_speed`, `itm_accel`, `itm_boost_time`, `itm_boost_spd`, `itm_fever_gauge`, `itm_fever_time`, `itm_fever_bonus`, `itm_train_hp`, `itm_spw_chance`, `itm_obstacle_power`, `itm_cost`) VALUES
+	(1, 'goddamnit', '템 설명서?', '1.png', 1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0),
+	(6, 'ㅎㅎㅎㅎㅎ', 'ㅆㅆㅆㅆㅆㅆ', 'items_5.png', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 /*!40000 ALTER TABLE `items` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad.items_effect 구조 내보내기
@@ -162,7 +213,7 @@ CREATE TABLE IF NOT EXISTS `items_iap` (
   PRIMARY KEY (`id_num`)
 ) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='유료템(in_app_purchase). 로그관리 용이성을 위해 분류.\r\nNULLIFIED';
 
--- 테이블 데이터 lifgames_railroad.items_iap:~1 rows (대략적) 내보내기
+-- 테이블 데이터 lifgames_railroad.items_iap:~0 rows (대략적) 내보내기
 DELETE FROM `items_iap`;
 /*!40000 ALTER TABLE `items_iap` DISABLE KEYS */;
 INSERT INTO `items_iap` (`id_num`, `item_nomo`, `item_klarigo`, `item_image`) VALUES
@@ -218,8 +269,8 @@ DELETE FROM `season`;
 DROP TABLE IF EXISTS `season_item`;
 CREATE TABLE IF NOT EXISTS `season_item` (
   `id_num` int(11) NOT NULL AUTO_INCREMENT,
-  `item_name` int(11) NOT NULL COMMENT '이름',
-  `item_desc` int(11) NOT NULL COMMENT '설명',
+  `item_name` varchar(50) COLLATE utf8_bin NOT NULL COMMENT '이름',
+  `item_desc` varchar(500) COLLATE utf8_bin NOT NULL COMMENT '설명',
   `item_image` varchar(50) COLLATE utf8_bin NOT NULL COMMENT '이미지이름',
   `item_iap` int(11) NOT NULL DEFAULT '0' COMMENT '유료템인가? 0이면 아님',
   `item_rank` int(11) NOT NULL COMMENT '랭크제한. 이 수치 이하면 사용 못하는거.',
@@ -281,7 +332,7 @@ CREATE TABLE IF NOT EXISTS `_blocked_player` (
   `blocked_num` int(11) NOT NULL COMMENT '차단대상',
   PRIMARY KEY (`user_num`,`blocked_num`),
   CONSTRAINT `FK__blokigxi_players` FOREIGN KEY (`user_num`) REFERENCES `_players` (`user_num`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='차단상대. 필요 없을듯. ';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='차단상대. 필요 없을듯. \r\nNULLIFIED';
 
 -- 테이블 데이터 lifgames_railroad._blocked_player:~0 rows (대략적) 내보내기
 DELETE FROM `_blocked_player`;
@@ -332,11 +383,11 @@ CREATE TABLE IF NOT EXISTS `_pass` (
   CONSTRAINT `user_num` FOREIGN KEY (`user_num`) REFERENCES `_users` (`user_num`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='암호';
 
--- 테이블 데이터 lifgames_railroad._pass:~1 rows (대략적) 내보내기
+-- 테이블 데이터 lifgames_railroad._pass:~0 rows (대략적) 내보내기
 DELETE FROM `_pass`;
 /*!40000 ALTER TABLE `_pass` DISABLE KEYS */;
 INSERT INTO `_pass` (`user_num`, `pwd`) VALUES
-	(10, '$5$rounds=535000$diRlKQeywQVq7hSP$2L/S6nnKV3RFViiYnqYhg4d316nRkqsvWRXURG9UG06');
+	(10, '$5$rounds=535000$mM40XdDhMCMrZqg5$7P7YJtowaTVu8SlVGO6zpxWjdkOH6rTRBbyb3XARYo9');
 /*!40000 ALTER TABLE `_pass` ENABLE KEYS */;
 
 -- 테이블 lifgames_railroad._players 구조 내보내기
@@ -358,7 +409,7 @@ CREATE TABLE IF NOT EXISTS `_players` (
   CONSTRAINT `player_num` FOREIGN KEY (`user_num`) REFERENCES `_users` (`user_num`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='플레이어들과 관련된 기본 사항. ';
 
--- 테이블 데이터 lifgames_railroad._players:~1 rows (대략적) 내보내기
+-- 테이블 데이터 lifgames_railroad._players:~0 rows (대략적) 내보내기
 DELETE FROM `_players`;
 /*!40000 ALTER TABLE `_players` DISABLE KEYS */;
 INSERT INTO `_players` (`player_num`, `player_unique_id`, `user_num`, `affiliated_crew_id`, `player_nick`, `player_highscore`, `reg_time`) VALUES
@@ -377,7 +428,7 @@ CREATE TABLE IF NOT EXISTS `_players_cash` (
   CONSTRAINT `FK__players_cash__players` FOREIGN KEY (`player_unique_id`) REFERENCES `_players` (`player_unique_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='게임 내 재화';
 
--- 테이블 데이터 lifgames_railroad._players_cash:~1 rows (대략적) 내보내기
+-- 테이블 데이터 lifgames_railroad._players_cash:~0 rows (대략적) 내보내기
 DELETE FROM `_players_cash`;
 /*!40000 ALTER TABLE `_players_cash` DISABLE KEYS */;
 INSERT INTO `_players_cash` (`player_unique_id`, `player_cash_1`, `player_cash_2`, `player_cash_3`, `player_cash_4`) VALUES
@@ -488,7 +539,7 @@ DELETE FROM `_users`;
 INSERT INTO `_users` (`user_num`, `user_id`, `user_email`, `user_bd`, `user_reg_date`, `last_login`, `pass`) VALUES
 	(1, 'yolo', 'aa@aa.com', '2017-11-07', '2017-11-07 17:07:34', NULL, 'liveonce'),
 	(2, 'haha', 'aa@aaa.com', NULL, '2017-11-16 13:18:13', NULL, NULL),
-	(10, 'someoneyouknow', 'yy@aaaa.com', NULL, '2017-11-16 14:22:50', NULL, NULL);
+	(10, 'someoneyouknow', 'yy@aaaa.com', NULL, '2017-11-16 14:22:50', NULL, 'carry');
 /*!40000 ALTER TABLE `_users` ENABLE KEYS */;
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

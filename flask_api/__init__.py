@@ -13,6 +13,7 @@ app.config['MYSQL_DATABASE_PASSWORD'] = '123'
 app.config['MYSQL_DATABASE_DB'] = 'lifgames_railroad'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['SECRET_KEY'] = 'nnd;fwjdwmfhgsktkrlv#kfWuf'  # ĉuk laboro estas fike.
 mysql.init_app(app)
 
 __all__ = [
@@ -25,4 +26,4 @@ __all__ = [
 
 # template_dir = os.path.abspath('/src/templates')
 
-from .src import views
+from .src import views, player_view

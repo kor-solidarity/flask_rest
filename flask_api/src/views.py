@@ -17,6 +17,11 @@ from flask import request, jsonify, render_template, redirect, url_for, session
 APP_ROUTE = os.path.dirname(os.path.abspath(__file__))
 
 
+@app.before_request
+def check():
+    print('5555555555555555555555555555')
+
+
 # 여기서 해야하는 사안:
 @app.route('/')  # ~.com/api/
 def hello():
@@ -51,73 +56,6 @@ def get_method():
     jsoned = json.JSONEncoder().encode(jsons)
 
     return jsoned
-
-
-@app.route('/reg_player/')
-def reg_player():
-    """
-    플레이어 등록.
-    :user_num
-    :return:
-    """
-    # 플레이어 이름(계정아이디)
-    user_num = request.args.get('user_num')
-    # 게임닉
-    nick = request.args.get('nick')
-    crew_id = request.args.get('crew_id')
-    test = request
-    print('user_num: {}, nick: {}, crew_id: {}'.format(user_num, nick, crew_id))
-    conn = mysql.connect()
-    cursor = conn.cursor()
-    print('chk2')
-    # 0. 이게 걸릴일은 없긴 한데... 이미 플레이어 등록된 계정에 새로 시도할 경우 중복아이디 오류
-    cursor.execute('SELECT player_unique_id from `_players` WHERE user_num = "{}"'.format(user_num))
-    if cursor.fetchone():
-        cursor.close()
-        conn.close()
-        return ERR_SAME_ID
-
-    print('chk3')
-    # 1. 닉이 중복되는지 확인한다.
-    # 2. 크루가 존재하는지 확인한다.
-    # 2. 등록완료.
-    cursor.execute('SELECT player_nick FROM `_players` WHERE player_nick = "{}"'.format(nick))
-    # 여기 걸리면 닉이 있는거임.
-    if cursor.fetchone():
-        cursor.close()
-        conn.close()
-        return error(ERR_SAME_NICK)
-    print('chk4')
-    # 크루 확인. 존재하는 크루인지 확인한다. 사실 인위적으로 뭘 잘못 건드리지 않는 한 문제는 안생길거라고 예상함.
-    # what_the = cursor.execute('select crew_id from crew where crew_id = "{}" AND crew_exist = "{}"'.format(crew_id, str(1)))
-    # print('crew? {}'.format(what_the))
-    # if not what_the:
-    if not cursor.execute('select crew_id from crew where crew_id = "{}" AND crew_exist = "{}"'.format(crew_id, str(1))):
-        print('checkin')
-        cursor.close()
-        conn.close()
-        return error(ERR_NO_CREW)
-    # print("huh", cursor.fetchall())
-
-    # 고유 식별번호.
-    unique_number = random.randint(1, 999000)
-    # 중복확인
-    cursor.execute('SELECT player_unique_id FROM `_players` WHERE player_unique_id = "{}"'.format(unique_number))
-    sama = cursor.fetchone()  # 여기서 None 반환 안하면 중복임.
-    print('sama: {}, unique_number: {}'.format(sama, unique_number))
-    # 식별번호가 중복? 그럼 중복 안될때까지 1더한다. Facile, ĉu ne?
-    while sama:
-        unique_number += 1
-        cursor.execute('SELECT player_unique_id FROM `_players` WHERE player_unique_id = "{}"'.format(unique_number))
-        sama = cursor.fetchone()
-
-    cursor.execute('INSERT INTO `_players`(player_unique_id, user_num, affiliated_crew_id, player_nick) '
-                   'VALUES ("{}", "{}", "{}", "{}")'.format(unique_number, user_num, crew_id, nick))
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-    return 'OK'
 
 
 # 친구추가
@@ -180,104 +118,6 @@ def block_user():
     상대방 차단. 아이디로 확인한다.
     :return:
     """
-
-
-# 로그인 시험
-@app.route('/login/')
-def trovi_ensaluti(user_id=None, pwd=None, reg=False):
-    """
-    :param user_id:
-    :param pwd:
-    :param reg:
-    위 세 변수는 회원가입 됐을 시 한정으로만 작동한다.
-    :return:
-    """
-    password = request.args.get('pass')
-    identify = request.args.get('id')
-
-    # 먼져 아이디가 있는지 확인한다.
-    # 그 후 암호 확인. 아래 함수에서 별도 실행함. 다른 모든 기능들도 이래야함.
-    result = verify.kontroli(identify, password)
-    print("res", result)
-
-    if not result:
-        # 로그인 오류: 암호 또는 아이디이 불일치.
-        return error(-4)
-
-    # 여기서부터 본격적인 작업 실시.
-    conn = mysql.connect()
-    cursor = conn.cursor()
-
-    cursor.execute('SELECT user_num FROM `_users` WHERE user_id="{}"'.format(identify))
-    # 유저번호 빼오기.
-    user_num = cursor.fetchone()[0]
-    print('user_num: {}'.format(user_num))
-    # 확인이 끝나면 반환값들 찾아야함.
-    # 여기(테이블)서 나와야 할 사안: 별명, 소속크루,
-    cursor.execute('SELECT player_nick, player_unique_id, affiliated_crew_id '
-                   'FROM `_players` WHERE user_num="{}"'.format(user_num))
-    player_inf = cursor.fetchone()
-    player_json = {PLAYER_NICK: player_inf[0], PLAYER_UNIQUE_ID: player_inf[1]
-                   , CREW_ID: player_inf[2]}
-
-    # progreso.
-    cursor.execute('select crew_name, crew_boundary '
-                   'from crew where crew_id="{}"'.format(player_inf[2]))
-    crew_inf = cursor.fetchone()
-    player_json.update({CREW_NAME: crew_inf[0], CREW_BOUNDARY: crew_inf[1]})
-
-    # amikoj
-    cursor.execute('SELECT friend_unique_id FROM `_friends_copy` '
-                   'WHERE player_unique_id = {0} AND friend_accepted = 1 '
-                   'UNION '
-                   'SELECT player_unique_id FROM `_friends_copy`'
-                   'WHERE friend_unique_id = {0}'.format(player_inf[1]))
-    amikoj = cursor.fetchall()
-    print('amikoj: {}'.format(amikoj))
-    friends_list = []
-
-    # 친구가 없으면 돌리는 의미가 없다.
-    if amikoj:
-        print()
-        # 각 친구들의 현황 추가해야함
-        for amiko in amikoj:
-            # 이름과 별명, 소속크루
-            cursor.execute('SELECT player_unique_id, player_nick, affiliated_crew_id '
-                           'from `_players` '
-                           'WHERE player_unique_id = "{}"'.format(amiko[0]))
-            friend_stat = cursor.fetchone()
-            # 크루이름.
-            cursor.execute('select crew_name '
-                           'from crew where crew_id="{}"'.format(friend_stat[2]))
-            friend_crew = cursor.fetchone()[0]
-            # 친구목록 넣는다.
-            friend_json = {PLAYER_UNIQUE_ID: friend_stat[0], PLAYER_NICK: friend_stat[1], CREW_NAME: friend_crew[0]}
-            friends_list.append(friend_json)
-    else:
-        print('no friends')
-    # 다 넣었으면 바로 추가작업 진행한다.
-    player_json.update({FRIENDS: friends_list})
-    print(player_json)
-
-    # 여기까지 왔으면 이제남은건 아이템 목록과 재화현황.
-    # todo 테이블을 쪼개되 종류별로 나눠야 함.
-    # 테이블에서 프라이머리 키는 둘 이상 됨. 고로 아이템번호와 계정아이디를 엮는다.
-
-
-
-    # json.dumps == dic를 JSON.stringify형태로 변환시켜준다.
-    stringify = json.dumps(player_json)
-    print('type: {} | {}'.format(type(stringify), stringify))
-    # jsoned = json.loads(player_json)
-    # print('type: {} | {}'.format(type(jsoned), jsoned))
-
-    # 다 끝내면 연결 바로바로 종료시킨다.
-    cursor.close()
-    conn.close()
-
-    return stringify
-
-
 # ONLY FOR TEST. BETTER NOT HAVE IT WHEN RELEASED
 @app.route('/debug/')
 def debug():
@@ -1039,3 +879,49 @@ def item_adding():
 # 아이템 목록으로 리다렉트 시켜줌.
 def redirect_to_item_list():
     return
+
+
+# 아이템 목록·효과를 JSON 형태로 싹 다 보낸다.
+@app.route('/tot_item_list/')
+def total_item_list():
+    # connect to the sql server
+    conn = mysql.connect()
+    cursor = conn.cursor()
+
+    # 안에 들어가야 하는 값들.
+    json_dic = {}
+
+    # 모든 템 관련 머시기들을 빼와야 하기 때문.
+    table_list = ['items', 'crew_item', 'season_item']
+    dic_total = {}
+    for tl in table_list:
+        cursor.execute('SELECT * FROM {}'.format(tl))
+        # 테이블 칼럼명
+        # table_desc = cursor.description
+        # 셀렉트문 결과값
+        table_val = cursor.fetchall()
+
+        # print(table_desc)
+        print(table_val)
+
+        dic_item = {tl: []}
+
+        for i in range(len(table_val)):
+            _table = []
+            # 낱개
+            for j in range(len(table_val[i])):
+                print('table_val[i][j]', table_val[i][j])
+                _table.append(table_val[i][j])
+
+            dic_item[tl].append(_table)
+
+        dic_total.update(dic_item)
+
+    print(dic_total)
+
+
+
+    cursor.close()
+    conn.close()
+
+    return json.dumps(dic_total)

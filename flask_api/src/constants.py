@@ -15,7 +15,10 @@ TOO_LONG = -6  # 뭔진 모르겠지만 입력한게 너무 길다.
 # 자료반환에 쓰일 각종 플레이어 칼럼명.
 PLAYER_UNIQUE_ID = 'player_unique_id'
 PLAYER_NICK = 'player_nick'
+CREW_BOUNDARY = 'crew_boundary'
+CREW_DESC = 'crew_desc'
 CREW_ID = 'crew_id'
 CREW_NAME = 'crew_name'
-CREW_BOUNDARY = 'crew_boundary'
+CREW_STATS = 'crew_stats'
 FRIENDS = 'friends'
+CASH = 'cash'
