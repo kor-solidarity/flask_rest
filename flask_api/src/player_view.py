@@ -128,7 +128,7 @@ def trovi_ensaluti(user_id=None, pwd=None, reg=False):
     # 테이블에서 프라이머리 키는 둘 이상 됨. 고로 아이템번호와 계정아이디를 엮는다.
 
     # json.dumps == dic를 JSON.stringify형태로 변환시켜준다.
-    stringify = json.dumps(player_json)
+    stringify = json.dumps(player_json, ensure_ascii=False)
     print('type: {} | {}'.format(type(stringify), stringify))
     # jsoned = json.loads(player_json)
     # print('type: {} | {}'.format(type(jsoned), jsoned))

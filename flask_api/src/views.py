@@ -17,9 +17,9 @@ from flask import request, jsonify, render_template, redirect, url_for, session
 APP_ROUTE = os.path.dirname(os.path.abspath(__file__))
 
 
-@app.before_request
-def check():
-    print('5555555555555555555555555555')
+# @app.before_request
+# def check():
+#     print('5555555555555555555555555555')
 
 
 # 여기서 해야하는 사안:
@@ -919,9 +919,9 @@ def total_item_list():
 
     print(dic_total)
 
-
+    # print(json.dumps(dic_total, ensure_ascii=False))
 
     cursor.close()
     conn.close()
 
-    return json.dumps(dic_total)
+    return json.dumps(dic_total, ensure_ascii=False)
