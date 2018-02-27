@@ -58,66 +58,6 @@ def get_method():
     return jsoned
 
 
-# 친구추가
-@app.route('/add_friend/')
-def aldoni_amikon():
-    # 의문사항. 플레이어를 연결해야 하는가? 계정을 연결해야 하는가? - 플레이어(캐릭터).
-    # 우선은 플레이어를 연결해야 한다고 가정함.
-    friend_id = request.args.get('friend_id')
-    player_id = request.args.get('player_id')
-
-    conn = mysql.connect()
-    cursor = conn.cursor()
-    cursor.execute('insert into `_friends` VALUES ("{}", "{}")'.format(player_id, friend_id))
-
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-    return OK
-
-
-@app.route('/get_friend/')
-def get_friend():
-    # 친구목록 불러오기.
-    # 플레이어 고유번호
-    player_unique_id = request.args.get('player_id')
-
-    conn = mysql.connect()
-    cursor = conn.cursor()
-    # cursor.execute('select * from INNER JOIN `_friends` on `_players`.player_unique_id = `_friends`.friend_unique_id '
-    #                'WHERE `_friends`.friend_unique_id = "{}"'.format(user_id))
-    # redonas numero de rezultoj
-    cursor.execute('SELECT friend_unique_id FROM `_friends_copy` '
-                   'WHERE player_unique_id = "{0}" '
-                   'UNION '
-                   'SELECT player_unique_id FROM `_friends_copy`'
-                   'WHERE friend_unique_id = "{0}"'.format(player_unique_id))
-
-    friend_ids = cursor.fetchall()
-
-    loads = []
-
-    content = {}
-
-    for f in friend_ids:
-        cursor.execute('select a.player_unique_id, a.player_nick  from `_players` AS a WHERE player_unique_id')
-        content = {PLAYER_UNIQUE_ID: f[1], 'email': f[2]}
-
-    cursor.close()
-    conn.close()
-    # 미완성. 자료가 유니티로 어떻게 넘겨지는지에 대해 좀 알아봐야함.
-    # 이름, 크루, 랭크, 고유 식별번호
-    # MUST BE IN JSON
-    return jsonify(loads)
-
-
-@app.route('/block_user/')
-def block_user():
-    """
-    상대방 차단. 아이디로 확인한다.
-    :return:
-    """
 # ONLY FOR TEST. BETTER NOT HAVE IT WHEN RELEASED
 @app.route('/debug/')
 def debug():

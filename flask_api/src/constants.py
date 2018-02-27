@@ -5,7 +5,7 @@ OK = 0
 
 ERR_SAME_NICK = -1  # 중복별명
 ERR_SAME_ID = -2  # 중복아이디
-ERR_EMAIL_EXIST = -3  # 이메일 중복
+ERR_EMAIL_EXIST = -3  # 이메일 이미 존재
 ERR_PWD_INCORRECT = -4  # 암호틀림
 ERR_ID_INCORRECT = -4  # 아이디가 틀림. 굳이 위와 따로 분류할 필요는 없을듯.
 ERR_NO_CREW = -5  # 선택한 크루는 존재하지 않음.
